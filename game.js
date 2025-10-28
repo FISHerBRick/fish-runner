@@ -49,7 +49,7 @@ const dino = {
 function spawnObstacle() {
   obstacles.push({
     x: canvas.width,
-    y: canvas.heigh - 50,
+    y: canvas.height - 50,
     width: 20 + Math.random() * 20,
     height: 40
   });

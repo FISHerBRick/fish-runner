@@ -47,11 +47,12 @@ const dino = {
 
 // Spawn cactus
 function spawnObstacle() {
+  const height = 40;
   obstacles.push({
     x: canvas.width,
-    y: canvas.height - 50,
+    y: canvas.height - height - 10, // top of the ground
     width: 20 + Math.random() * 20,
-    height: 40
+    height: height
   });
 }
 

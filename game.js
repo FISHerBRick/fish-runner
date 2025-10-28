@@ -13,7 +13,7 @@ let gameOver = false;
 // Dino
 const dino = {
   x: 50,
-  y: 150,
+  y: canvas.height - 50, //start near bottom
   width: 40,
   height: 40,
   dy: 0,
@@ -30,8 +30,10 @@ const dino = {
   update() {
     this.dy += gravity;
     this.y += this.dy;
-    if (this.y > 150) {
-      this.y = 150;
+    
+     // Dino lands on the ground
+    if (this.y > canvas.height - this.height - 10) {
+      this.y = canvas.height - this.height - 10;
       this.dy = 0;
       this.grounded = true;
     }
@@ -47,7 +49,7 @@ const dino = {
 function spawnObstacle() {
   obstacles.push({
     x: canvas.width,
-    y: 160,
+    y: canvas.heigh - 50,
     width: 20 + Math.random() * 20,
     height: 40
   });
@@ -91,7 +93,7 @@ function drawGround() {
   groundX -= gameSpeed;
   if (groundX <= -canvas.width) groundX = 0;
   ctx.fillStyle = "#888";
-  ctx.fillRect(groundX, 190, canvas.width * 2, 10);
+  ctx.fillRect(groundX, canvas.height - 10, canvas.width * 2, 10);
 }
 
 // Draw score
@@ -107,7 +109,7 @@ function resetGame() {
   gameSpeed = 5;
   score = 0;
   gameOver = false;
-  dino.y = 150;
+  dino.y = canvas.height - dino.height - 10;
   dino.dy = 0;
   loop();
 }

@@ -3,10 +3,10 @@ const ctx = canvas.getContext("2d");
 
 // --- Sprites ---
 const walkFrames = [
-  "WhatsApp_Image_2025-10-31_at_17.54.47_3f52f1be-removebg-preview.png",
-  "WhatsApp_Image_2025-10-31_at_17.54.51_96433c19-removebg-preview.png",
-  "WhatsApp_Image_2025-10-31_at_17.54.55_364fb04c-removebg-preview.png",
-  "WhatsApp_Image_2025-10-31_at_17.55.00_aec8cfdd-removebg-preview.png",
+  "WhatsApp_Image_2025-10-31_at_17.54.47_3f52f1be-removebg-preview.png"
+  "WhatsApp_Image_2025-10-31_at_17.54.51_96433c19-removebg-preview.png"
+  "WhatsApp_Image_2025-10-31_at_17.54.55_364fb04c-removebg-preview.png"
+  "WhatsApp_Image_2025-10-31_at_17.55.00_aec8cfdd-removebg-preview.png"
   "WhatsApp_Image_2025-10-31_at_17.55.04_92df43ed-removebg-preview.png"
 ].map(name => {
   const img = new Image();

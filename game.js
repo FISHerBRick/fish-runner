@@ -1,42 +1,43 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-// --- Sprites ---
-const walkNames = [
+// --- Sprites (local images in the same folder) ---
+const walkFrames = [
   "WhatsApp_Image_2025-10-31_at_17.54.47_3f52f1be-removebg-preview.png",
   "WhatsApp_Image_2025-10-31_at_17.54.51_96433c19-removebg-preview.png",
   "WhatsApp_Image_2025-10-31_at_17.54.55_364fb04c-removebg-preview.png",
   "WhatsApp_Image_2025-10-31_at_17.55.00_aec8cfdd-removebg-preview.png",
   "WhatsApp_Image_2025-10-31_at_17.55.04_92df43ed-removebg-preview.png"
-];
-
-const walkFrames = walkNames.map(name => {
+].map(name => {
   const img = new Image();
-  img.src = `https://raw.githubusercontent.com/FISHerBRick/fish-runner/main/${name}`;
+  img.src = name;
+  img.onerror = () => console.error("Failed to load:", img.src);
   return img;
 });
 
-// Use the 3rd frame as jump frame for now
+// Jump frame (can reuse one of the walk frames or create a separate image)
 const jumpFrame = new Image();
-jumpFrame.src = walkFrames[2].src;
+jumpFrame.src = "WhatsApp_Image_2025-10-31_at_17.54.55_364fb04c-removebg-preview.png"; // for example
+jumpFrame.onerror = () => console.error("Failed to load jump frame");
 
+// --- Animation variables ---
 let currentFrame = 0;
 let frameCount = 0;
-const frameSpeed = 6; // controls running animation speed
+const frameSpeed = 8;
 
 // --- Game variables ---
 let gravity = 0.6;
-let gameSpeed = 6;
+let gameSpeed = 5;
 let score = 0;
 let groundX = 0;
 let spawnTimer = 0;
 let obstacles = [];
 let gameOver = false;
 
-// --- Fish player ---
+// --- Fish Player ---
 const fish = {
   x: 50,
-  y: canvas.height - 70,
+  y: canvas.height - 60,
   width: 60,
   height: 60,
   dy: 0,
@@ -51,6 +52,8 @@ const fish = {
   update() {
     this.dy += gravity;
     this.y += this.dy;
+
+    // Land on the ground
     if (this.y > canvas.height - this.height - 10) {
       this.y = canvas.height - this.height - 10;
       this.dy = 0;
@@ -58,7 +61,8 @@ const fish = {
     }
   },
   draw() {
-    const sprite = this.grounded ? walkFrames[currentFrame] : jumpFrame;
+    // Animate running
+    let sprite = this.grounded ? walkFrames[currentFrame] : jumpFrame;
     ctx.drawImage(sprite, this.x, this.y, this.width, this.height);
   }
 };
@@ -95,7 +99,7 @@ function updateObstacles() {
       gameOver = true;
     }
 
-    // Remove off-screen obstacles
+    // Remove off-screen
     if (obs.x + obs.width < 0) obstacles.splice(i, 1);
   }
 }
@@ -125,7 +129,7 @@ function drawScore() {
 // --- Reset ---
 function resetGame() {
   obstacles = [];
-  gameSpeed = 6;
+  gameSpeed = 5;
   score = 0;
   gameOver = false;
   fish.y = canvas.height - fish.height - 10;
@@ -133,7 +137,7 @@ function resetGame() {
   loop();
 }
 
-// --- Main loop ---
+// --- Main Loop ---
 function loop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -144,15 +148,15 @@ function loop() {
   drawObstacles();
   drawScore();
 
-  // Animate running frames
-  if (fish.grounded && !gameOver) {
+  // Animate fish running
+  if (fish.grounded) {
     frameCount++;
     if (frameCount >= frameSpeed) {
       currentFrame = (currentFrame + 1) % walkFrames.length;
       frameCount = 0;
     }
-  } else if (!fish.grounded) {
-    currentFrame = 2; // jumping sprite
+  } else {
+    currentFrame = 2; // jump frame index (can adjust)
   }
 
   if (gameOver) {
@@ -168,7 +172,6 @@ function loop() {
     return;
   }
 
-  // Increase score and speed
   score += 0.1;
   gameSpeed += 0.002;
 
@@ -181,14 +184,13 @@ document.addEventListener("keydown", (e) => {
   if (e.code === "KeyR" && gameOver) resetGame();
 });
 
-// --- Start game when all images are loaded ---
+// --- Start game ---
 let imagesLoaded = 0;
 [...walkFrames, jumpFrame].forEach(img => {
   img.onload = () => {
     imagesLoaded++;
-    if (imagesLoaded === walkFrames.length + 1) {
+    if (imagesLoaded === walkFrames.length + 1) { // include jumpFrame
       loop();
     }
   };
-  img.onerror = () => console.error("Failed to load image:", img.src);
 });

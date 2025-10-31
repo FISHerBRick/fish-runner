@@ -26,7 +26,6 @@ const frameSpeed = 8;
 let gravity = 0.6;
 let gameSpeed = 6;
 let score = 0;
-let groundX = 0;
 let spawnTimer = 0;
 let obstacles = [];
 let gameOver = false;
@@ -62,16 +61,17 @@ const fish = {
   }
 };
 
-// --- Obstacles ---
+// --- Obstacles (blocks for fish to jump over) ---
 function spawnObstacle() {
   const height = 40;
+  const width = 20 + Math.random() * 20;
   obstacles.push({
     x: canvas.width,
     y: canvas.height - height - 10,
-    width: 20 + Math.random() * 20,
+    width: width,
     height: height
   });
-  spawnTimer = 80 + Math.random() * 60; // spacing between obstacles
+  spawnTimer = 100 + Math.random() * 100; // spacing between blocks
 }
 
 function updateObstacles() {
@@ -97,7 +97,7 @@ function updateObstacles() {
 }
 
 function drawObstacles() {
-  ctx.fillStyle = "#228B22";
+  ctx.fillStyle = "#228B22"; // green block
   for (let obs of obstacles) {
     ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
   }
@@ -105,10 +105,8 @@ function drawObstacles() {
 
 // --- Ground ---
 function drawGround() {
-  groundX -= gameSpeed;
-  if (groundX <= -canvas.width) groundX = 0;
   ctx.fillStyle = "#888";
-  ctx.fillRect(groundX, canvas.height - 10, canvas.width * 2, 10);
+  ctx.fillRect(0, canvas.height - 10, canvas.width, 10);
 }
 
 // --- Score ---
@@ -163,7 +161,7 @@ function loop() {
   }
 
   score += 0.1;
-  gameSpeed += 0.001; // slower ramp-up for smoother difficulty
+  gameSpeed += 0.001; // gradual speed increase
 
   requestAnimationFrame(loop);
 }

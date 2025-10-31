@@ -2,13 +2,15 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 // --- Sprites ---
-const walkFrames = [
+const walkFramesNames = [
   "WhatsApp_Image_2025-10-31_at_17.54.47_3f52f1be-removebg-preview.png",
   "WhatsApp_Image_2025-10-31_at_17.54.51_96433c19-removebg-preview.png",
   "WhatsApp_Image_2025-10-31_at_17.54.55_364fb04c-removebg-preview.png",
   "WhatsApp_Image_2025-10-31_at_17.55.00_aec8cfdd-removebg-preview.png",
   "WhatsApp_Image_2025-10-31_at_17.55.04_92df43ed-removebg-preview.png"
-].map(name => {
+];
+
+const walkFrames = walkFramesNames.map(name => {
   const img = new Image();
   img.src = `https://raw.githubusercontent.com/FISHerBRick/fish-runner/main/${name}`;
   return img;
@@ -56,12 +58,12 @@ const fish = {
     }
   },
   draw() {
-    let sprite = this.grounded ? walkFrames[currentFrame] : jumpFrame;
+    const sprite = this.grounded ? walkFrames[currentFrame] : jumpFrame;
     ctx.drawImage(sprite, this.x, this.y, this.width, this.height);
   }
 };
 
-// --- Obstacles (blocks for fish to jump over) ---
+// --- Obstacles ---
 function spawnObstacle() {
   const height = 40;
   const width = 20 + Math.random() * 20;
@@ -71,7 +73,7 @@ function spawnObstacle() {
     width: width,
     height: height
   });
-  spawnTimer = 100 + Math.random() * 100; // spacing between blocks
+  spawnTimer = 100 + Math.random() * 100;
 }
 
 function updateObstacles() {
@@ -82,7 +84,6 @@ function updateObstacles() {
     const obs = obstacles[i];
     obs.x -= gameSpeed;
 
-    // Collision
     if (
       fish.x < obs.x + obs.width &&
       fish.x + fish.width > obs.x &&
@@ -97,10 +98,8 @@ function updateObstacles() {
 }
 
 function drawObstacles() {
-  ctx.fillStyle = "#228B22"; // green block
-  for (let obs of obstacles) {
-    ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-  }
+  ctx.fillStyle = "#228B22";
+  obstacles.forEach(obs => ctx.fillRect(obs.x, obs.y, obs.width, obs.height));
 }
 
 // --- Ground ---
@@ -138,7 +137,6 @@ function loop() {
   drawObstacles();
   drawScore();
 
-  // Animate fish running
   if (fish.grounded) {
     frameCount++;
     if (frameCount >= frameSpeed) {
@@ -146,7 +144,7 @@ function loop() {
       frameCount = 0;
     }
   } else {
-    currentFrame = 2; // jump frame
+    currentFrame = 2;
   }
 
   if (gameOver) {
@@ -161,22 +159,23 @@ function loop() {
   }
 
   score += 0.1;
-  gameSpeed += 0.001; // gradual speed increase
+  gameSpeed += 0.001;
 
   requestAnimationFrame(loop);
 }
 
 // --- Controls ---
-document.addEventListener("keydown", (e) => {
+document.addEventListener("keydown", e => {
   if (e.code === "Space") fish.jump();
   if (e.code === "KeyR" && gameOver) resetGame();
 });
 
-// --- Start game ---
+// --- Start game after all images loaded ---
 let imagesLoaded = 0;
 [...walkFrames, jumpFrame].forEach(img => {
   img.onload = () => {
     imagesLoaded++;
     if (imagesLoaded === walkFrames.length + 1) loop();
   };
+  img.onerror = () => console.error("Failed to load:", img.src);
 });

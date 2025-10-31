@@ -2,23 +2,20 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 // --- Sprites ---
-const walkFrameNames = [
+const walkFrames = [
   "WhatsApp_Image_2025-10-31_at_17.54.47_3f52f1be-removebg-preview.png",
   "WhatsApp_Image_2025-10-31_at_17.54.51_96433c19-removebg-preview.png",
   "WhatsApp_Image_2025-10-31_at_17.54.55_364fb04c-removebg-preview.png",
   "WhatsApp_Image_2025-10-31_at_17.55.00_aec8cfdd-removebg-preview.png",
   "WhatsApp_Image_2025-10-31_at_17.55.04_92df43ed-removebg-preview.png"
-];
-
-const walkFrames = walkFrameNames.map(name => {
+].map(name => {
   const img = new Image();
-  img.src = `https://raw.githubusercontent.com/FISHerBRick/fish-runner/main/${name}`;
+  img.src = name; // direct path
   return img;
 });
 
-// Jump frame (can be replaced with a proper jump sprite)
 const jumpFrame = new Image();
-jumpFrame.src = "https://raw.githubusercontent.com/FISHerBRick/fish-runner/main/WhatsApp_Image_2025-10-31_at_17.54.55_364fb04c-removebg-preview.png";
+jumpFrame.src = "WhatsApp_Image_2025-10-31_at_17.54.55_364fb04c-removebg-preview.png"; // use one sprite for jump
 
 let currentFrame = 0;
 let frameCount = 0;
@@ -150,7 +147,7 @@ function loop() {
       frameCount = 0;
     }
   } else {
-    currentFrame = 0;
+    currentFrame = 0; // reset when jumping
   }
 
   if (gameOver) {
@@ -178,7 +175,7 @@ document.addEventListener("keydown", (e) => {
   if (e.code === "KeyR" && gameOver) resetGame();
 });
 
-// --- Start game after images loaded ---
+// --- Start game after images load ---
 let imagesLoaded = 0;
 [...walkFrames, jumpFrame].forEach(img => {
   img.onload = () => {
@@ -186,4 +183,5 @@ let imagesLoaded = 0;
     if (imagesLoaded === walkFrames.length + 1) loop();
   };
 });
+
 

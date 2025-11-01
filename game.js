@@ -30,7 +30,8 @@ const frameSpeed = 8;
 let gravity = 0.6;
 let gameSpeed = 5;
 let score = 0;
-let groundY = canvas.height - 50;
+const groundHeight = 20; // thickness of the ground
+let groundY = canvas.height - groundHeight; // top position of the ground
 let obstacles = [];
 let spawnTimer = 0;
 let gameOver = false;
@@ -113,8 +114,8 @@ function drawObstacles() {
 
 // --- Ground ---
 function drawGround() {
-  ctx.fillStyle = "#FFDF8A";
-  ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+  ctx.fillStyle = "#FFDF8A"; // yellow color
+  ctx.fillRect(0, groundY, canvas.width, groundHeight);
 }
 
 // --- Score ---

@@ -19,7 +19,7 @@ jumpFrame.src = "WhatsApp_Image_2025-10-31_at_17.54.55_364fb04c-removebg-preview
 
 // --- Background ---
 const background = new Image();
-background.src = "Background.jpeg";
+background.src = "Bbackground.jpeg";
 
 // --- Animation ---
 let currentFrame = 0;

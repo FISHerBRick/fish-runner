@@ -17,6 +17,10 @@ const walkFrames = [
 const jumpFrame = new Image();
 jumpFrame.src = "WhatsApp_Image_2025-10-31_at_17.54.55_364fb04c-removebg-preview.png";
 
+// --- Background ---
+const background = new Image();
+background.src = "Background.jpeg";
+
 // --- Animation ---
 let currentFrame = 0;
 let frameCount = 0;
@@ -134,6 +138,7 @@ function resetGame() {
 // --- Main Loop ---
 function loop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
   drawGround();
   fish.update();

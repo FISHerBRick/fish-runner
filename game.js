@@ -113,7 +113,6 @@ function drawObstacles() {
 
 // --- Ground ---
 function drawGround() {
-  const groundHeight = 20;
   ctx.fillStyle = "#888";
   ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
 }

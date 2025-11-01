@@ -113,7 +113,7 @@ function drawObstacles() {
 
 // --- Ground ---
 function drawGround() {
-  ctx.fillStyle = "#888";
+  ctx.fillStyle = "#FFDF8A";
   ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
 }
 

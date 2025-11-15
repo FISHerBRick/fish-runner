@@ -20,6 +20,37 @@ const jumpFrame = new Image();
 jumpFrame.src = "WhatsApp_Image_2025-10-31_at_17.54.55_364fb04c-removebg-preview.png";
 
 // ------------------------------------------------------------
+// ----------------------- ENEMY (CRAB) ------------------------
+// ------------------------------------------------------------
+const enemyFrames = [
+  "WhatsApp_Image_2025-11-15_at_18.26.39_87b049ea-removebg-preview.png",
+  "WhatsApp_Image_2025-11-15_at_18.26.32_094df33f-removebg-preview.png",
+  "WhatsApp_Image_2025-11-15_at_18.26.17_8b544d03-removebg-preview.png",
+  "WhatsApp_Image_2025-11-15_at_18.26.11_a228a4d3-removebg-preview.png"
+].map(name => {
+  const img = new Image();
+  img.src = name;
+  return img;
+});
+
+// Array to hold multiple enemies
+let enemies = [];
+
+// Spawn enemy at random intervals
+function spawnEnemy() {
+  const height = 40;
+  enemies.push({
+    x: canvas.width + Math.random() * 300, // random spawn off-screen
+    y: groundY - height,
+    width: 60,
+    height: height,
+    speed: 5 + Math.random() * 2, // slightly different speeds
+    frame: 0,
+    frameCounter: 0
+  });
+}
+
+// ------------------------------------------------------------
 // ----------------------- BACKGROUND --------------------------
 // ------------------------------------------------------------
 const background = new Image();
@@ -79,57 +110,37 @@ const fish = {
 };
 
 // ------------------------------------------------------------
-// ----------------------- ENEMY (CRAB) ------------------------
+// ----------------------- ENEMY FUNCTIONS ---------------------
 // ------------------------------------------------------------
-const enemyFrames = [
-  "WhatsApp_Image_2025-11-15_at_18.26.39_87b049ea-removebg-preview.png",
-  "WhatsApp_Image_2025-11-15_at_18.26.32_094df33f-removebg-preview.png",
-  "WhatsApp_Image_2025-11-15_at_18.26.17_8b544d03-removebg-preview.png",
-  "WhatsApp_Image_2025-11-15_at_18.26.11_a228a4d3-removebg-preview.png"
-].map(name => {
-  const img = new Image();
-  img.src = name;
-  return img;
-});
+function updateEnemies() {
+  // Spawn enemies every random interval
+  if (Math.random() < 0.01) spawnEnemy();
 
-let enemyX = canvas.width + 200; // start off-screen
-let enemyY = groundY - 40;
-let enemyWidth = 60;
-let enemyHeight = 40;
-let enemySpeed = 6;
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    const e = enemies[i];
+    e.x -= e.speed;
 
-let enemyFrame = 0;
-let enemyFrameCounter = 0;
-let enemyFrameDelay = 10;
+    // Animate enemy
+    e.frameCounter++;
+    if (e.frameCounter >= 10) {
+      e.frame = (e.frame + 1) % enemyFrames.length;
+      e.frameCounter = 0;
+    }
 
-// ------------------------------------------------------------
-// ----------------------- ENEMY UPDATE ------------------------
-// ------------------------------------------------------------
-function updateEnemy() {
-  enemyX -= enemySpeed;
+    ctx.drawImage(enemyFrames[e.frame], e.x, e.y, e.width, e.height);
 
-  if (enemyX + enemyWidth < 0) {
-    enemyX = canvas.width + Math.random() * 400; // respawn
-  }
+    // Collision with fish
+    if (
+      fish.x < e.x + e.width &&
+      fish.x + fish.width > e.x &&
+      fish.y < e.y + e.height &&
+      fish.y + fish.height > e.y
+    ) {
+      gameOver = true;
+    }
 
-  // Animate enemy
-  enemyFrameCounter++;
-  if (enemyFrameCounter >= enemyFrameDelay) {
-    enemyFrame = (enemyFrame + 1) % enemyFrames.length;
-    enemyFrameCounter = 0;
-  }
-
-  // Draw enemy sprite
-  ctx.drawImage(enemyFrames[enemyFrame], enemyX, enemyY, enemyWidth, enemyHeight);
-
-  // Collision detection
-  if (
-    fish.x < enemyX + enemyWidth &&
-    fish.x + fish.width > enemyX &&
-    fish.y < enemyY + enemyHeight &&
-    fish.y + fish.height > enemyY
-  ) {
-    gameOver = true;
+    // Remove off-screen enemies
+    if (e.x + e.width < 0) enemies.splice(i, 1);
   }
 }
 
@@ -159,7 +170,7 @@ function resetGame() {
   gameOver = false;
   fish.y = groundY - fish.height;
   fish.dy = 0;
-  enemyX = canvas.width + 200;
+  enemies = [];
   loop();
 }
 
@@ -169,10 +180,9 @@ function resetGame() {
 function loop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Scroll background
+  // Background scroll
   bgX -= bgSpeed;
   if (bgX <= -canvas.width) bgX = 0;
-
   ctx.drawImage(background, bgX, 0, canvas.width, canvas.height);
   ctx.drawImage(background, bgX + canvas.width, 0, canvas.width, canvas.height);
 
@@ -180,7 +190,7 @@ function loop() {
   fish.update();
   fish.draw();
 
-  updateEnemy();
+  updateEnemies();
 
   drawScore();
 
@@ -208,6 +218,7 @@ function loop() {
 
   score += 0.1;
   gameSpeed += 0.002;
+
   bgSpeed = gameSpeed * 0.5;
 
   requestAnimationFrame(loop);
@@ -225,13 +236,14 @@ document.addEventListener("keydown", e => {
 // ---------------------- START GAME ---------------------------
 // ------------------------------------------------------------
 let imagesLoaded = 0;
-[...walkFrames, jumpFrame, ...enemyFrames, background].forEach(img => {
+[...walkFrames, jumpFrame, ...enemyFrames].forEach(img => {
   img.onload = () => {
     imagesLoaded++;
-    if (imagesLoaded === walkFrames.length + enemyFrames.length + 2) {
+    if (imagesLoaded === walkFrames.length + enemyFrames.length + 1) {
       loop();
     }
   };
 });
+
 
 

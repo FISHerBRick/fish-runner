@@ -1,7 +1,7 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-// --- Sprites (local images) ---
+// --- Fish walk sprites ---
 const walkFrames = [
   "WhatsApp_Image_2025-10-31_at_17.54.47_3f52f1be-removebg-preview.png",
   "WhatsApp_Image_2025-10-31_at_17.54.51_96433c19-removebg-preview.png",
@@ -21,7 +21,7 @@ jumpFrame.src = "WhatsApp_Image_2025-10-31_at_17.54.55_364fb04c-removebg-preview
 const background = new Image();
 background.src = "bbackground.jpeg";
 
-// Scroling Background variables
+// Scrolling background
 let bgX = 0;
 let bgSpeed = 0;
 
@@ -30,16 +30,41 @@ let currentFrame = 0;
 let frameCount = 0;
 const frameSpeed = 8;
 
-// --- Game variables ---
+// --- Game values ---
 let gravity = 0.6;
 let gameSpeed = 5;
 let score = 0;
 let groundY = canvas.height - 50;
-let obstacles = [];
-let spawnTimer = 0;
 let gameOver = false;
 
-// --- Player ---
+// ------------------------------------------------------------
+// ---------------------- CRAB ENEMY ---------------------------
+// ------------------------------------------------------------
+let enemyX = canvas.width;
+let enemyY = groundY - 40;
+let enemyWidth = 50;
+let enemyHeight = 40;
+let enemySpeed = 5;
+
+// Crab animation frames
+const enemyFrames = [
+  "WhatsApp Image 2025-11-15 at 18.26.39_87b049ea.jpg",
+  "WhatsApp Image 2025-11-15 at 18.26.32_094df33f.jpg",
+  "WhatsApp Image 2025-11-15 at 18.26.17_8b544d03.jpg",
+  "WhatsApp Image 2025-11-15 at 18.26.11_a228a4d3.jpg"
+].map(name => {
+  const img = new Image();
+  img.src = name;
+  return img;
+});
+
+let enemyFrame = 0;
+let enemyFrameCounter = 0;
+let enemyFrameDelay = 10;
+
+// ------------------------------------------------------------
+// ------------------------- FISH ------------------------------
+// ------------------------------------------------------------
 const fish = {
   x: 50,
   y: groundY - 60,
@@ -48,129 +73,125 @@ const fish = {
   dy: 0,
   jumpForce: -12,
   grounded: true,
+
   jump() {
     if (this.grounded && !gameOver) {
       this.dy = this.jumpForce;
       this.grounded = false;
     }
   },
+
   update() {
     this.dy += gravity;
     this.y += this.dy;
 
-    // Land on ground
+    // Landing
     if (this.y > groundY - this.height) {
       this.y = groundY - this.height;
       this.dy = 0;
       this.grounded = true;
     }
   },
+
   draw() {
     const sprite = this.grounded ? walkFrames[currentFrame] : jumpFrame;
     ctx.drawImage(sprite, this.x, this.y, this.width, this.height);
   }
 };
 
-// --- Obstacles ---
-function spawnObstacle() {
-  const height = 40;
-  obstacles.push({
-    x: canvas.width,
-    y: groundY - height,
-    width: 20 + Math.random() * 30,
-    height: height
-  });
-}
+// ------------------------------------------------------------
+// -------------------- ENEMY UPDATE ---------------------------
+// ------------------------------------------------------------
+function updateEnemy() {
 
-function updateObstacles() {
-  spawnTimer--;
-  if (spawnTimer <= 0) {
-    spawnObstacle();
-    spawnTimer = 100 + Math.random() * 100;
+  // Movement
+  enemyX -= enemySpeed;
+
+  // Reset when off screen
+  if (enemyX + enemyWidth < 0) {
+    enemyX = canvas.width + Math.random() * 300;
   }
 
-  for (let i = obstacles.length - 1; i >= 0; i--) {
-    const obs = obstacles[i];
-    obs.x -= gameSpeed;
+  // Animation
+  enemyFrameCounter++;
+  if (enemyFrameCounter >= enemyFrameDelay) {
+    enemyFrame = (enemyFrame + 1) % enemyFrames.length;
+    enemyFrameCounter = 0;
+  }
 
-    // Collision detection
-    if (
-      fish.x < obs.x + obs.width &&
-      fish.x + fish.width > obs.x &&
-      fish.y < obs.y + obs.height &&
-      fish.y + fish.height > obs.y
-    ) {
-      gameOver = true;
-    }
+  // Draw enemy
+  ctx.drawImage(enemyFrames[enemyFrame], enemyX, enemyY, enemyWidth, enemyHeight);
 
-    // Remove off-screen
-    if (obs.x + obs.width < 0) obstacles.splice(i, 1);
+  // Collision
+  if (
+    fish.x < enemyX + enemyWidth &&
+    fish.x + fish.width > enemyX &&
+    fish.y < enemyY + enemyHeight &&
+    fish.y + fish.height > enemyY
+  ) {
+    gameOver = true;
   }
 }
 
-function drawObstacles() {
-  ctx.fillStyle = "#f00";
-  for (let obs of obstacles) {
-    ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-  }
-}
-
-// --- Ground ---
+// ------------------------------------------------------------
+// ------------------------ GROUND -----------------------------
+// ------------------------------------------------------------
 function drawGround() {
   ctx.fillStyle = "#FFDF8A";
   ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
 }
 
-// --- Score ---
+// ------------------------------------------------------------
+// -------------------------- SCORE -----------------------------
+// ------------------------------------------------------------
 function drawScore() {
   ctx.fillStyle = "#000";
   ctx.font = "20px Arial";
   ctx.fillText(`Score: ${Math.floor(score)}`, 650, 30);
 }
 
-// --- Reset ---
+// ------------------------------------------------------------
+// ------------------------- RESET ------------------------------
+// ------------------------------------------------------------
 function resetGame() {
-  obstacles = [];
-  gameSpeed = 5;
-  score = 0;
   gameOver = false;
+  score = 0;
+  gameSpeed = 5;
+
   fish.y = groundY - fish.height;
   fish.dy = 0;
+
+  enemyX = canvas.width;
+
   loop();
 }
 
-// --- Main Loop ---
+// ------------------------------------------------------------
+// ----------------------- MAIN LOOP ---------------------------
+// ------------------------------------------------------------
 function loop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-// Scroll background
-bgX -= bgSpeed;
+  // Background scroll
+  bgX -= bgSpeed;
+  if (bgX <= -canvas.width) bgX = 0;
 
-// Loop when background moves off screen
-if (bgX <= -canvas.width) {
-  bgX = 0;
-}
-
-// Draw two backgrounds side-by-side for seamless scrolling
-ctx.drawImage(background, bgX, 0, canvas.width, canvas.height);
-ctx.drawImage(background, bgX + canvas.width, 0, canvas.width, canvas.height);
+  ctx.drawImage(background, bgX, 0, canvas.width, canvas.height);
+  ctx.drawImage(background, bgX + canvas.width, 0, canvas.width, canvas.height);
 
   drawGround();
   fish.update();
-  updateObstacles();
   fish.draw();
-  drawObstacles();
+  updateEnemy();
   drawScore();
 
-  // Animate running
+  // Running animation
   if (fish.grounded) {
     frameCount++;
     if (frameCount >= frameSpeed) {
       currentFrame = (currentFrame + 1) % walkFrames.length;
       frameCount = 0;
     }
-  } else {
-    currentFrame = 2; // jump frame index
   }
 
   if (gameOver) {
@@ -184,28 +205,34 @@ ctx.drawImage(background, bgX + canvas.width, 0, canvas.width, canvas.height);
     return;
   }
 
+  // Speed increase + scoring
   score += 0.1;
   gameSpeed += 0.002;
+  enemySpeed = gameSpeed;
 
-  // Make background speed proportional to game speed
-  bgSpeed = gameSpeed * 0.5; // Adjust 0.5 to make it look right
-  
+  bgSpeed = gameSpeed * 0.5;
+
   requestAnimationFrame(loop);
 }
 
-// --- Controls ---
+// ------------------------------------------------------------
+// ------------------------ CONTROLS ----------------------------
+// ------------------------------------------------------------
 document.addEventListener("keydown", e => {
   if (e.code === "Space") fish.jump();
   if (e.code === "KeyR" && gameOver) resetGame();
 });
 
-// --- Start ---
+// ------------------------------------------------------------
+// ------------------------- START ------------------------------
+// ------------------------------------------------------------
 let imagesLoaded = 0;
-[...walkFrames, jumpFrame].forEach(img => {
+[...walkFrames, jumpFrame, ...enemyFrames].forEach(img => {
   img.onload = () => {
     imagesLoaded++;
-    if (imagesLoaded === walkFrames.length + 1) {
+    if (imagesLoaded === walkFrames.length + 1 + enemyFrames.length) {
       loop();
     }
   };
 });
+

@@ -21,6 +21,10 @@ jumpFrame.src = "WhatsApp_Image_2025-10-31_at_17.54.55_364fb04c-removebg-preview
 const background = new Image();
 background.src = "bbackground.jpeg";
 
+// Scroling Background variables
+let bgX = 0;
+let bgSpeed = 2;
+
 // --- Animation ---
 let currentFrame = 0;
 let frameCount = 0;
@@ -138,7 +142,18 @@ function resetGame() {
 // --- Main Loop ---
 function loop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+// Scroll background
+bgX -= bgSpeed;
+
+// Loop when background moves off screen
+if (bgX <= -canvas.width) {
+  bgX = 0;
+}
+
+// Draw two backgrounds side-by-side for seamless scrolling
+ctx.drawImage(background, bgX, 0, canvas.width, canvas.height);
+ctx.drawImage(background, bgX + canvas.width, 0, canvas.width, canvas.height);
 
   drawGround();
   fish.update();

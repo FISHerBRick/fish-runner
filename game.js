@@ -23,7 +23,7 @@ background.src = "bbackground.jpeg";
 
 // Scroling Background variables
 let bgX = 0;
-let bgSpeed = 2;
+let bgSpeed = 0;
 
 // --- Animation ---
 let currentFrame = 0;
@@ -187,6 +187,9 @@ ctx.drawImage(background, bgX + canvas.width, 0, canvas.width, canvas.height);
   score += 0.1;
   gameSpeed += 0.002;
 
+  // Make background speed proportional to game speed
+  bgSpeed = gameSpeed * 0.5; // Adjust 0.5 to make it look right
+  
   requestAnimationFrame(loop);
 }
 

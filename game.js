@@ -82,17 +82,17 @@ const fish = {
 // ----------------------- ENEMY (CRAB) ------------------------
 // ------------------------------------------------------------
 const enemyFrames = [
-  "WhatsApp Image 2025-11-15 at 18.26.39_87b049ea.jpg",
-  "WhatsApp Image 2025-11-15 at 18.26.32_094df33f.jpg",
-  "WhatsApp Image 2025-11-15 at 18.26.17_8b544d03.jpg",
-  "WhatsApp Image 2025-11-15 at 18.26.11_a228a4d3.jpg"
+  "WhatsApp_Image_2025-11-15_at_18.26.39_87b049ea-removebg-preview.png",
+  "WhatsApp_Image_2025-11-15_at_18.26.32_094df33f-removebg-preview.png",
+  "WhatsApp_Image_2025-11-15_at_18.26.17_8b544d03-removebg-preview.png",
+  "WhatsApp_Image_2025-11-15_at_18.26.11_a228a4d3-removebg-preview.png"
 ].map(name => {
   const img = new Image();
   img.src = name;
   return img;
 });
 
-let enemyX = canvas.width;
+let enemyX = canvas.width + 200; // initial spawn
 let enemyY = groundY - 40;
 let enemyWidth = 60;
 let enemyHeight = 40;
@@ -118,6 +118,7 @@ function updateEnemy() {
 
   ctx.drawImage(enemyFrames[enemyFrame], enemyX, enemyY, enemyWidth, enemyHeight);
 
+  // Collision with fish
   if (
     fish.x < enemyX + enemyWidth &&
     fish.x + fish.width > enemyX &&
@@ -154,8 +155,7 @@ function resetGame() {
   gameOver = false;
   fish.y = groundY - fish.height;
   fish.dy = 0;
-
-  enemyX = canvas.width;
+  enemyX = canvas.width + 200;
 
   loop();
 }
@@ -181,6 +181,7 @@ function loop() {
 
   drawScore();
 
+  // Animate fish running
   if (fish.grounded) {
     frameCount++;
     if (frameCount >= frameSpeed) {
@@ -204,7 +205,6 @@ function loop() {
 
   score += 0.1;
   gameSpeed += 0.002;
-
   bgSpeed = gameSpeed * 0.5;
 
   requestAnimationFrame(loop);
@@ -230,3 +230,4 @@ let imagesLoaded = 0;
     }
   };
 });
+

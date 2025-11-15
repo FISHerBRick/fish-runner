@@ -92,7 +92,7 @@ const enemyFrames = [
   return img;
 });
 
-let enemyX = canvas.width + 200; // initial spawn
+let enemyX = canvas.width + 200; // start off-screen
 let enemyY = groundY - 40;
 let enemyWidth = 60;
 let enemyHeight = 40;
@@ -102,23 +102,27 @@ let enemyFrame = 0;
 let enemyFrameCounter = 0;
 let enemyFrameDelay = 10;
 
-// Updates enemy movement + animation + collision
+// ------------------------------------------------------------
+// ----------------------- ENEMY UPDATE ------------------------
+// ------------------------------------------------------------
 function updateEnemy() {
   enemyX -= enemySpeed;
 
   if (enemyX + enemyWidth < 0) {
-    enemyX = canvas.width + Math.random() * 400;
+    enemyX = canvas.width + Math.random() * 400; // respawn
   }
 
+  // Animate enemy
   enemyFrameCounter++;
   if (enemyFrameCounter >= enemyFrameDelay) {
     enemyFrame = (enemyFrame + 1) % enemyFrames.length;
     enemyFrameCounter = 0;
   }
 
+  // Draw enemy sprite
   ctx.drawImage(enemyFrames[enemyFrame], enemyX, enemyY, enemyWidth, enemyHeight);
 
-  // Collision with fish
+  // Collision detection
   if (
     fish.x < enemyX + enemyWidth &&
     fish.x + fish.width > enemyX &&
@@ -156,7 +160,6 @@ function resetGame() {
   fish.y = groundY - fish.height;
   fish.dy = 0;
   enemyX = canvas.width + 200;
-
   loop();
 }
 
@@ -166,7 +169,7 @@ function resetGame() {
 function loop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Background scroll
+  // Scroll background
   bgX -= bgSpeed;
   if (bgX <= -canvas.width) bgX = 0;
 
@@ -181,7 +184,7 @@ function loop() {
 
   drawScore();
 
-  // Animate fish running
+  // Animate fish
   if (fish.grounded) {
     frameCount++;
     if (frameCount >= frameSpeed) {
@@ -222,12 +225,13 @@ document.addEventListener("keydown", e => {
 // ---------------------- START GAME ---------------------------
 // ------------------------------------------------------------
 let imagesLoaded = 0;
-[...walkFrames, jumpFrame, ...enemyFrames].forEach(img => {
+[...walkFrames, jumpFrame, ...enemyFrames, background].forEach(img => {
   img.onload = () => {
     imagesLoaded++;
-    if (imagesLoaded === walkFrames.length + enemyFrames.length + 1) {
+    if (imagesLoaded === walkFrames.length + enemyFrames.length + 2) {
       loop();
     }
   };
 });
+
 

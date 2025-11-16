@@ -197,7 +197,8 @@ function updatePuffers() {
 
     // Draw only if alive
     if (p.alive) {
-      ctx.drawImage(pufferFrames[p.frame], p.x, p.y, p.width, p.height);
+      ctx.fillStyle = "red";
+      ctx.fillRect(p.x, p.y, p.width, p.height); // or ctx.arc(...) for a circle
     }
 
     // Collision with fish → instant death

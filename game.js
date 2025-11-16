@@ -53,15 +53,7 @@ function spawnEnemy() {
 // ------------------------------------------------------------
 // --------------------- PUFFERFISH ENEMY ----------------------
 // ------------------------------------------------------------
-const pufferFrames = [
-  "puffer1.png",
-  "puffer2.png",
-  "puffer3.png"
-].map(name => {
-  const img = new Image();
-  img.src = name;
-  return img;
-});
+const pufferFrames = [];
 
 // Array to hold pufferfish enemies
 let puffers = [];

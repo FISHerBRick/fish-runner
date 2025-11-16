@@ -113,8 +113,15 @@ const fish = {
 // ----------------------- ENEMY FUNCTIONS ---------------------
 // ------------------------------------------------------------
 function updateEnemies() {
-  // Spawn enemies every random interval
-  if (Math.random() < 0.01) spawnEnemy();
+  // Spawn enemies with minimum spacing
+  if (Math.random() < 0.01) {
+  const last = enemies[enemies.length - 1];
+  
+  // Only spawn if there is enough space from the last crab
+  if (!last || last.x < canvas.width - 250) {
+    spawnEnemy();
+  }
+}
 
   for (let i = enemies.length - 1; i >= 0; i--) {
     const e = enemies[i];

@@ -114,11 +114,11 @@ const fish = {
 // ------------------------------------------------------------
 function updateEnemies() {
   // Spawn enemies with minimum spacing
-  if (Math.random() < 0.01) {
+  if (Math.random() < 0.02) {
   const last = enemies[enemies.length - 1];
   
   // Only spawn if there is enough space from the last crab
-  if (!last || last.x < canvas.width - 250) {
+  if (!last || last.x < canvas.width - 200) {
     spawnEnemy();
   }
 }

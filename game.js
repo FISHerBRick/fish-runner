@@ -51,6 +51,35 @@ function spawnEnemy() {
 }
 
 // ------------------------------------------------------------
+// --------------------- PUFFERFISH ENEMY ----------------------
+// ------------------------------------------------------------
+const pufferFrames = [
+  "puffer1.png",
+  "puffer2.png",
+  "puffer3.png"
+].map(name => {
+  const img = new Image();
+  img.src = name;
+  return img;
+});
+
+// Array to hold pufferfish enemies
+let puffers = [];
+
+function spawnPuffer() {
+  puffers.push({
+    x: canvas.width + 50,
+    y: 100 + Math.random() * 200, // flies mid-air
+    width: 50,
+    height: 50,
+    speed: 4 + Math.random() * 2,
+    frame: 0,
+    frameCounter: 0,
+    alive: true
+  });
+}
+
+// ------------------------------------------------------------
 // ----------------------- BACKGROUND --------------------------
 // ------------------------------------------------------------
 const background = new Image();
@@ -152,6 +181,52 @@ function updateEnemies() {
 }
 
 // ------------------------------------------------------------
+// ------------------- UPDATE PUFFERFISH -----------------------
+// ------------------------------------------------------------
+function updatePuffers() {
+
+  // Random chance to spawn
+  if (Math.random() < 0.005) {
+    spawnPuffer();
+  }
+
+  for (let i = puffers.length - 1; i >= 0; i--) {
+    const p = puffers[i];
+
+    // Move left
+    p.x -= p.speed;
+
+    // Animation
+    p.frameCounter++;
+    if (p.frameCounter >= 10) {
+      p.frame = (p.frame + 1) % pufferFrames.length;
+      p.frameCounter = 0;
+    }
+
+    // Draw only if alive
+    if (p.alive) {
+      ctx.drawImage(pufferFrames[p.frame], p.x, p.y, p.width, p.height);
+    }
+
+    // Collision with fish → instant death
+    if (
+      p.alive &&
+      fish.x < p.x + p.width &&
+      fish.x + fish.width > p.x &&
+      fish.y < p.y + p.height &&
+      fish.y + fish.height > p.y
+    ) {
+      gameOver = true;
+    }
+
+    // Remove if off-screen
+    if (p.x + p.width < 0) {
+      puffers.splice(i, 1);
+    }
+  }
+}
+
+// ------------------------------------------------------------
 // -------------------------- GROUND ---------------------------
 // ------------------------------------------------------------
 function drawGround() {
@@ -198,7 +273,8 @@ function loop() {
   fish.draw();
 
   updateEnemies();
-
+  updatePuffers();
+  
   drawScore();
 
   // Animate fish
@@ -237,6 +313,14 @@ function loop() {
 document.addEventListener("keydown", e => {
   if (e.code === "Space") fish.jump();
   if (e.code === "KeyR" && gameOver) resetGame();
+    // Press E to punch pufferfish
+  if (e.code === "KeyE") {
+    puffers.forEach(p => {
+      if (p.x < fish.x + 100 && p.alive) {
+        p.alive = false;
+      }
+    });
+  }
 });
 
 // ------------------------------------------------------------

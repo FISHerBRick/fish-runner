@@ -36,6 +36,8 @@ const enemyFrames = [
 // Array to hold multiple enemies
 let enemies = [];
 
+let particles = [];
+
 // Spawn enemy at random intervals
 function spawnEnemy() {
   const height = 40;
@@ -219,6 +221,28 @@ function updatePuffers() {
   }
 }
 
+function updateParticles() {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+
+    // Draw particle
+    ctx.fillStyle = `rgba(255, 0, 0, ${p.alpha})`;  // red explosion
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Move particle
+    p.x += p.dx;
+    p.y += p.dy;
+
+    // Fade out
+    p.alpha -= 0.03;
+
+    // Remove when invisible
+    if (p.alpha <= 0) particles.splice(i, 1);
+  }
+}
+
 // ------------------------------------------------------------
 // -------------------------- GROUND ---------------------------
 // ------------------------------------------------------------
@@ -267,6 +291,7 @@ function loop() {
 
   updateEnemies();
   updatePuffers();
+  updateParticles();
   
   drawScore();
 
@@ -311,10 +336,21 @@ document.addEventListener("keydown", e => {
     puffers.forEach(p => {
       if (p.x < fish.x + 100 && p.alive) {
         p.alive = false;
+
+      // Spawn explosion particles
+      for (let i = 0; i < 15; i++) {
+        particles.push({
+          x: p.x + p.width / 2,        // start from pufferfish center
+          y: p.y + p.height / 2,
+          dx: (Math.random() - 0.5) * 8,  // random horizontal speed
+          dy: (Math.random() - 0.5) * 8,  // random vertical speed
+          alpha: 1,
+          size: 6 + Math.random() * 4     // random size
+        });
       }
+    }
     });
   }
-});
 
 // ------------------------------------------------------------
 // ---------------------- START GAME ---------------------------

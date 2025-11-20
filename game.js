@@ -221,15 +221,15 @@ function updatePuffers() {
   }
 }
 
+// Update Particles
+
 function updateParticles() {
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
 
     // Draw particle
     ctx.fillStyle = `rgba(255, 0, 0, ${p.alpha})`;  // red explosion
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
 
     // Move particle
     p.x += p.dx;

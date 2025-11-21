@@ -36,36 +36,70 @@ const enemyFrames = [
 // Array to hold multiple enemies
 let enemies = [];
 
-let particles = [];
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-// Spawn enemy at random intervals
-function spawnEnemy() {
-  const height = 40;
-  enemies.push({
-    x: canvas.width + Math.random() * 300, // random spawn off-screen
-    y: groundY - height,
-    width: 60,
-    height: height,
-    speed: 5 + Math.random() * 2, // slightly different speeds
-    frame: 0,
-    frameCounter: 0
-  });
-}
+// ------------------------------------------------------------
+// ----------------------- FISH SPRITES ------------------------
+// ------------------------------------------------------------
+const walkFrames = [
+  "WhatsApp_Image_2025-10-31_at_17.54.47_3f52f1be-removebg-preview.png",
+  "WhatsApp_Image_2025-10-31_at_17.54.51_96433c19-removebg-preview.png",
+  "WhatsApp_Image_2025-10-31_at_17.54.55_364fb04c-removebg-preview.png",
+  "WhatsApp_Image_2025-10-31_at_17.55.00_aec8cfdd-removebg-preview.png",
+  "WhatsApp_Image_2025-10-31_at_17.55.04_92df43ed-removebg-preview.png"
+].map(name => {
+  const img = new Image();
+  img.src = name;
+  return img;
+});
+
+const jumpFrame = new Image();
+jumpFrame.src = "WhatsApp_Image_2025-10-31_at_17.54.55_364fb04c-removebg-preview.png";
+
+// ------------------------------------------------------------
+// ----------------------- ENEMY (CRAB) ------------------------
+// ------------------------------------------------------------
+const enemyFrames = [
+  "WhatsApp_Image_2025-11-15_at_18.26.39_87b049ea-removebg-preview.png",
+  "WhatsApp_Image_2025-11-15_at_18.26.32_094df33f-removebg-preview.png",
+  "WhatsApp_Image_2025-11-15_at_18.26.17_8b544d03-removebg-preview.png",
+  "WhatsApp_Image_2025-11-15_at_18.26.11_a228a4d3-removebg-preview.png"
+].map(name => {
+  const img = new Image();
+  img.src = name;
+  return img;
+});
+
+// Multiple crab enemies
+let enemies = [];
 
 // ------------------------------------------------------------
 // --------------------- PUFFERFISH ENEMY ----------------------
 // ------------------------------------------------------------
-const pufferFrames = [];
+const pufferFrames = [
+  "WhatsApp_Image_2025-11-21_at_16.43.14_55cd5749-removebg-preview.png",
+  "WhatsApp_Image_2025-11-21_at_16.43.05_1eb00eac-removebg-preview.png",
+  "WhatsApp_Image_2025-11-21_at_16.42.38_22498641-removebg-preview.png",
+  "WhatsApp_Image_2025-11-21_at_16.42.23_aca60190-removebg-preview.png",
+  "WhatsApp_Image_2025-11-21_at_16.42.17_997a2bb4-removebg-preview.png",
+  "WhatsApp_Image_2025-11-21_at_16.42.17_3e25ce04-removebg-preview.png"
+].map(name => {
+  const img = new Image();
+  img.src = name;
+  return img;
+});
 
-// Array to hold pufferfish enemies
 let puffers = [];
+let particles = [];
 
+// Spawn flying pufferfish
 function spawnPuffer() {
   puffers.push({
     x: canvas.width + 50,
-    y: 100 + Math.random() * 200, // flies mid-air
-    width: 50,
-    height: 50,
+    y: 100 + Math.random() * 150, // flying height
+    width: 55,
+    height: 55,
     speed: 4 + Math.random() * 2,
     frame: 0,
     frameCounter: 0,
@@ -83,7 +117,7 @@ let bgX = 0;
 let bgSpeed = 0;
 
 // ------------------------------------------------------------
-// --------------------- ANIMATION DATA ------------------------
+// --------------------- GAME VARIABLES ------------------------
 // ------------------------------------------------------------
 let currentFrame = 0;
 let frameCount = 0;
@@ -133,25 +167,29 @@ const fish = {
 };
 
 // ------------------------------------------------------------
-// ----------------------- ENEMY FUNCTIONS ---------------------
+// ------------------------- CRABS -----------------------------
 // ------------------------------------------------------------
-function updateEnemies() {
-  // Spawn enemies with minimum spacing
-  if (Math.random() < 0.02) {
-  const last = enemies[enemies.length - 1];
-  
-  // Only spawn if there is enough space from the last crab
-  if (!last || last.x < canvas.width - 200) {
-    spawnEnemy();
-  }
+function spawnEnemy() {
+  enemies.push({
+    x: canvas.width + Math.random() * 300,
+    y: groundY - 40,
+    width: 60,
+    height: 40,
+    speed: 5 + Math.random() * 2,
+    frame: 0,
+    frameCounter: 0
+  });
 }
+
+function updateEnemies() {
+  if (Math.random() < 0.02) spawnEnemy();
 
   for (let i = enemies.length - 1; i >= 0; i--) {
     const e = enemies[i];
-    e.x -= e.speed;
 
-    // Animate enemy
+    e.x -= e.speed;
     e.frameCounter++;
+
     if (e.frameCounter >= 10) {
       e.frame = (e.frame + 1) % enemyFrames.length;
       e.frameCounter = 0;
@@ -169,41 +207,32 @@ function updateEnemies() {
       gameOver = true;
     }
 
-    // Remove off-screen enemies
     if (e.x + e.width < 0) enemies.splice(i, 1);
   }
 }
 
 // ------------------------------------------------------------
-// ------------------- UPDATE PUFFERFISH -----------------------
+// ------------------- PUFFERFISH LOGIC ------------------------
 // ------------------------------------------------------------
 function updatePuffers() {
-
-  // Random chance to spawn
-  if (Math.random() < 0.005) {
-    spawnPuffer();
-  }
+  if (Math.random() < 0.007) spawnPuffer();
 
   for (let i = puffers.length - 1; i >= 0; i--) {
     const p = puffers[i];
 
-    // Move left
     p.x -= p.speed;
 
-    // Animation
     p.frameCounter++;
     if (p.frameCounter >= 10) {
       p.frame = (p.frame + 1) % pufferFrames.length;
       p.frameCounter = 0;
     }
 
-    // Draw only if alive
     if (p.alive) {
-      ctx.fillStyle = "red";
-      ctx.fillRect(p.x, p.y, p.width, p.height); // or ctx.arc(...) for a circle
+      ctx.drawImage(pufferFrames[p.frame], p.x, p.y, p.width, p.height);
     }
 
-    // Collision with fish → instant death
+    // COLLISION
     if (
       p.alive &&
       fish.x < p.x + p.width &&
@@ -214,31 +243,24 @@ function updatePuffers() {
       gameOver = true;
     }
 
-    // Remove if off-screen
-    if (p.x + p.width < 0) {
-      puffers.splice(i, 1);
-    }
+    if (p.x + p.width < 0) puffers.splice(i, 1);
   }
 }
 
-// Update Particles
-
+// ------------------------------------------------------------
+// -------------------- PARTICLES (Explosion) ------------------
+// ------------------------------------------------------------
 function updateParticles() {
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
 
-    // Draw particle
-    ctx.fillStyle = `rgba(255, 0, 0, ${p.alpha})`;  // red explosion
-    ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+    ctx.fillStyle = `rgba(255,0,0,${p.alpha})`;
+    ctx.fillRect(p.x, p.y, p.size, p.size);
 
-    // Move particle
     p.x += p.dx;
     p.y += p.dy;
-
-    // Fade out
     p.alpha -= 0.03;
 
-    // Remove when invisible
     if (p.alpha <= 0) particles.splice(i, 1);
   }
 }
@@ -257,19 +279,21 @@ function drawGround() {
 function drawScore() {
   ctx.fillStyle = "#000";
   ctx.font = "20px Arial";
-  ctx.fillText(`Score: ${Math.floor(score)}`, 650, 30);
+  ctx.fillText("Score: " + Math.floor(score), 650, 30);
 }
 
 // ------------------------------------------------------------
 // --------------------------- RESET ---------------------------
 // ------------------------------------------------------------
 function resetGame() {
-  gameSpeed = 5;
   score = 0;
+  gameSpeed = 5;
   gameOver = false;
+  enemies = [];
+  puffers = [];
+  particles = [];
   fish.y = groundY - fish.height;
   fish.dy = 0;
-  enemies = [];
   loop();
 }
 
@@ -279,9 +303,9 @@ function resetGame() {
 function loop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Background scroll
   bgX -= bgSpeed;
   if (bgX <= -canvas.width) bgX = 0;
+
   ctx.drawImage(background, bgX, 0, canvas.width, canvas.height);
   ctx.drawImage(background, bgX + canvas.width, 0, canvas.width, canvas.height);
 
@@ -292,7 +316,6 @@ function loop() {
   updateEnemies();
   updatePuffers();
   updateParticles();
-  
   drawScore();
 
   // Animate fish
@@ -319,7 +342,6 @@ function loop() {
 
   score += 0.1;
   gameSpeed += 0.002;
-
   bgSpeed = gameSpeed * 0.5;
 
   requestAnimationFrame(loop);
@@ -331,40 +353,37 @@ function loop() {
 document.addEventListener("keydown", e => {
   if (e.code === "Space") fish.jump();
   if (e.code === "KeyR" && gameOver) resetGame();
-    // Press E to punch pufferfish
+
   if (e.code === "KeyE") {
     puffers.forEach(p => {
-      if (p.x < fish.x + 100 && p.alive) {
+      if (p.alive && p.x < fish.x + 100) {
         p.alive = false;
-
-      // Spawn explosion particles
-      for (let i = 0; i < 15; i++) {
-        particles.push({
-          x: p.x + p.width / 2,        // start from pufferfish center
-          y: p.y + p.height / 2,
-          dx: (Math.random() - 0.5) * 8,  // random horizontal speed
-          dy: (Math.random() - 0.5) * 8,  // random vertical speed
-          alpha: 1,
-          size: 6 + Math.random() * 4     // random size
-        });
+        for (let i = 0; i < 20; i++) {
+          particles.push({
+            x: p.x + p.width / 2,
+            y: p.y + p.height / 2,
+            dx: (Math.random() - 0.5) * 6,
+            dy: (Math.random() - 0.5) * 6,
+            alpha: 1,
+            size: 4 + Math.random() * 4
+          });
+        }
       }
-    }
-  });
-}
+    });
+  }
 });
 
 // ------------------------------------------------------------
-// ---------------------- START GAME ---------------------------
+// ---------------------- LOAD IMAGES ---------------------------
 // ------------------------------------------------------------
 let imagesLoaded = 0;
-[...walkFrames, jumpFrame, ...enemyFrames].forEach(img => {
+const allImages = [...walkFrames, jumpFrame, ...enemyFrames, ...pufferFrames];
+
+allImages.forEach(img => {
   img.onload = () => {
     imagesLoaded++;
-    if (imagesLoaded === walkFrames.length + enemyFrames.length + 1) {
+    if (imagesLoaded === allImages.length) {
       loop();
     }
   };
 });
-
-
-

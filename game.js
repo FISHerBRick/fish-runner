@@ -62,7 +62,7 @@ class Particle {
     this.y = y;
     this.dx = (Math.random() - 0.5) * 4; // horizontal speed
     this.dy = (Math.random() - 1.5) * 4; // vertical speed
-    this.radius = 3 + Math.random() * 2;
+    this.size = 4 + Math.random() * 3;   // size of the square
     this.life = 30 + Math.random() * 20; // frames to live
     this.color = color;
   }
@@ -74,10 +74,8 @@ class Particle {
   }
 
   draw() {
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.fillStyle = this.color;
-    ctx.fill();
+    ctx.fillRect(this.x, this.y, this.size, this.size);
   }
 }
 
@@ -298,6 +296,7 @@ if (fish.punching) {
   if (fish.punchFrameCount >= fish.punchDuration) {
     fish.punching = false;
   }
+}
 
   // Update and draw particles
 for (let i = particles.length - 1; i >= 0; i--) {
@@ -308,6 +307,7 @@ for (let i = particles.length - 1; i >= 0; i--) {
 }
 
   // Check collision with puffers
+if (fish.punching) {
   puffers.forEach(p => {
   if (
     p.alive &&

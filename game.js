@@ -54,6 +54,33 @@ const pufferFrames = [
 
 let puffers = [];
 
+let particles = [];
+
+class Particle {
+  constructor(x, y, color) {
+    this.x = x;
+    this.y = y;
+    this.dx = (Math.random() - 0.5) * 4; // horizontal speed
+    this.dy = (Math.random() - 1.5) * 4; // vertical speed
+    this.radius = 3 + Math.random() * 2;
+    this.life = 30 + Math.random() * 20; // frames to live
+    this.color = color;
+  }
+
+  update() {
+    this.x += this.dx;
+    this.y += this.dy;
+    this.life--;
+  }
+
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+  }
+}
+
 // ------------------------------------------------------------
 // ----------------------- BACKGROUND --------------------------
 // ------------------------------------------------------------
@@ -272,19 +299,32 @@ if (fish.punching) {
     fish.punching = false;
   }
 
+  // Update and draw particles
+for (let i = particles.length - 1; i >= 0; i--) {
+  const particle = particles[i];
+  particle.update();
+  particle.draw();
+  if (particle.life <= 0) particles.splice(i, 1);
+}
+
   // Check collision with puffers
   puffers.forEach(p => {
-    if (
-      p.alive &&
-      fish.x + fish.width + fish.punchRange > p.x &&
-      fish.x < p.x + p.width &&
-      fish.y + fish.height > p.y &&
-      fish.y < p.y + p.height
-    ) {
-      p.alive = false; // Puffer dies when punched
-      score += 5;      // optional: bonus points
+  if (
+    p.alive &&
+    fish.x + fish.width + fish.punchRange > p.x &&
+    fish.x < p.x + p.width &&
+    fish.y + fish.height > p.y &&
+    fish.y < p.y + p.height
+  ) {
+    p.alive = false; // Puffer dies
+
+    // Spawn particles
+    const pufferColor = "#FFD700"; // color of the pufferfish
+    for (let i = 0; i < 15; i++) {
+      particles.push(new Particle(p.x + p.width / 2, p.y + p.height / 2, pufferColor));
     }
-  });
+  }
+});
 }
 
   updateEnemies();

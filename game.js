@@ -88,7 +88,17 @@ const fish = {
   dy: 0,
   jumpForce: -12,
   grounded: true,
-
+  punching: false,       // is the fish currently punching
+  punchDuration: 10,     // how many frames the punch lasts
+  punchFrameCount: 0,    // counter for punch frames
+  punchRange: 40,        // distance in front of fish that counts as a punch
+  punch() {
+  if (!gameOver) {
+    this.punching = true;
+    this.punchFrameCount = 0;
+  }
+}
+  
   jump() {
     if (this.grounded && !gameOver) {
       this.dy = this.jumpForce;
@@ -255,6 +265,32 @@ function loop() {
   fish.update();
   fish.draw();
 
+  // Handle punch timing
+if (fish.punching) {
+  fish.punchFrameCount++;
+  if (fish.punchFrameCount >= fish.punchDuration) {
+    fish.punching = false;
+  }
+
+  // Check collision with puffers
+  puffers.forEach(p => {
+    if (
+      p.alive &&
+      fish.x + fish.width + fish.punchRange > p.x &&
+      fish.x < p.x + p.width &&
+      fish.y + fish.height > p.y &&
+      fish.y < p.y + p.height
+    ) {
+      p.alive = false; // Puffer dies when punched
+      score += 5;      // optional: bonus points
+    }
+  });
+
+  // Show punch effect
+  ctx.fillStyle = "rgba(255,0,0,0.3)";
+  ctx.fillRect(fish.x + fish.width, fish.y + 10, fish.punchRange, fish.height - 20);
+}
+
   updateEnemies();
   updatePuffers();
 
@@ -294,6 +330,7 @@ function loop() {
 document.addEventListener("keydown", e => {
   if (e.code === "Space") fish.jump();
   if (e.code === "KeyR" && gameOver) resetGame();
+  if (e.code === "KeyE") fish.punch();
 });
 
 // ------------------------------------------------------------

@@ -97,7 +97,7 @@ const fish = {
     this.punching = true;
     this.punchFrameCount = 0;
   }
-}
+},
   
   jump() {
     if (this.grounded && !gameOver) {

@@ -285,10 +285,6 @@ if (fish.punching) {
       score += 5;      // optional: bonus points
     }
   });
-
-  // Show punch effect
-  ctx.fillStyle = "rgba(255,0,0,0.3)";
-  ctx.fillRect(fish.x + fish.width, fish.y + 10, fish.punchRange, fish.height - 20);
 }
 
   updateEnemies();

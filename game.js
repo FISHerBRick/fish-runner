@@ -42,7 +42,7 @@ const enemyFrames = [
 });
 
 let enemies = [];
-let enemyCooldown = 0; // controls crab spawn rate
+let enemyCooldown = 0;
 
 // --------------------- PUFFERFISH ENEMY ----------------------
 const pufferFrames = [
@@ -50,7 +50,7 @@ const pufferFrames = [
   "WhatsApp_Image_2025-11-21_at_16.43.05_1eb00eac-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_16.42.38_22498641-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_16.42.23_aca60190-removebg-preview.png",
-  "WhatsApp_Image_2025-11-21_at_16.42.17_997a2bb5-removebg-preview.png",
+  "WhatsApp_Image_2025-11-21_at_16.42.17_997a2bb4-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_16.42.17_3e25ce04-removebg-preview.png"
 ].map(src => {
   const img = new Image();
@@ -98,7 +98,7 @@ let frameCount = 0;
 let frameSpeed = 8;
 
 let gravity = 0.6;
-let baseSpeed = 4;
+let baseSpeed = 5;
 let gameSpeed = baseSpeed;
 let score = 0;
 let groundY = canvas.height - 50;
@@ -114,7 +114,6 @@ const fish = {
   grounded: true,
   jumpForce: -12,
 
-  // Punching
   punching: false,
   punchFrame: 0,
   punchFrameCounter: 0,
@@ -146,7 +145,6 @@ const fish = {
       this.grounded = true;
     }
 
-    // Punch animation
     if (this.punching) {
       this.punchFrameCounter++;
       if (this.punchFrameCounter >= this.punchFrameSpeed) {
@@ -162,7 +160,6 @@ const fish = {
     if (this.punching) sprite = punchFrames[this.punchFrame];
     else if (!this.grounded) sprite = jumpFrame;
     else sprite = walkFrames[currentFrame];
-
     ctx.drawImage(sprite, this.x, this.y, this.width, this.height);
   }
 };
@@ -175,17 +172,17 @@ function spawnEnemy() {
       y: groundY - 40,
       width: 60,
       height: 40,
-      speed: 3 + Math.random() * 2, // visible speed even at start
+      speed: 3 + Math.random() * 2,
       frame: 0,
       frameCounter: 0
     });
-    enemyCooldown = 90 + Math.random() * 30; // random spawn interval
+    enemyCooldown = 120 + Math.random() * 60;
   }
 }
 
 // ----------------------- ENEMY UPDATE ------------------------
 function updateEnemies() {
-  enemyCooldown--;
+  if (!gameOver) enemyCooldown--;
 
   for (let i = enemies.length - 1; i >= 0; i--) {
     const e = enemies[i];
@@ -204,9 +201,7 @@ function updateEnemies() {
       fish.x + fish.width > e.x &&
       fish.y < e.y + e.height &&
       fish.y + fish.height > e.y
-    ) {
-      gameOver = true;
-    }
+    ) gameOver = true;
 
     if (e.x + e.width < 0) enemies.splice(i, 1);
   }
@@ -250,7 +245,6 @@ function updatePuffers() {
       fish.y + fish.height > p.y
     ) gameOver = true;
 
-    // Punch kill
     if (
       fish.punching &&
       p.alive &&
@@ -288,11 +282,9 @@ function resetGame() {
   gameOver = false;
   fish.y = groundY - fish.height;
   fish.dy = 0;
-
   gameSpeed = baseSpeed;
   bgSpeed = 0;
   enemyCooldown = 0;
-
   loop();
 }
 
@@ -307,7 +299,6 @@ function loop() {
   ctx.drawImage(background, bgX + canvas.width, 0, canvas.width, canvas.height);
 
   drawGround();
-
   fish.update();
   fish.draw();
 
@@ -321,10 +312,9 @@ function loop() {
 
   updateEnemies();
   updatePuffers();
-
   drawScore();
 
-  // Walking animation
+  // walking animation
   if (fish.grounded && !fish.punching) {
     frameCount++;
     if (frameCount >= frameSpeed) {
@@ -333,10 +323,10 @@ function loop() {
     }
   }
 
-  // Gradually increase speed like Dino game
+  // Speed scaling like Dino game
   if (!gameOver) {
     score += 0.1;
-    gameSpeed += 0.002;
+    gameSpeed += 0.001; // slightly slower acceleration
     bgSpeed = gameSpeed * 0.5;
   }
 
@@ -368,7 +358,7 @@ const totalImages =
   punchFrames.length +
   enemyFrames.length +
   pufferFrames.length +
-  1;
+  1; // jumpFrame
 
 [...walkFrames, ...punchFrames, ...enemyFrames, ...pufferFrames, jumpFrame].forEach(img => {
   img.onload = () => {
@@ -376,6 +366,3 @@ const totalImages =
     if (imagesLoaded >= totalImages) loop();
   };
 });
-
-
-

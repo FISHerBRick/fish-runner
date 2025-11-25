@@ -166,25 +166,16 @@ const fish = {
       if (this.punchFrameCounter >= this.punchFrameSpeed) {
         this.punchFrameCounter = 0;
         this.punchFrame++;
-        if (this.punchFrame >= punchFrames.length) {
-          this.punching = false;
-          this.punchFrame = 0;
-        }
+        if (this.punchFrame >= punchFrames.length) this.punching = false;
       }
     }
   },
 
   draw() {
     let sprite;
-
-    // Priority: Punch > Jump > Walk
-    if (this.punching) {
-      sprite = punchFrames[this.punchFrame];
-    } else if (!this.grounded) {
-      sprite = jumpFrame;
-    } else {
-      sprite = walkFrames[currentFrame];
-    }
+    if (this.punching) sprite = punchFrames[this.punchFrame];
+    else if (!this.grounded) sprite = jumpFrame;
+    else sprite = walkFrames[currentFrame];
 
     ctx.drawImage(sprite, this.x, this.y, this.width, this.height);
   }
@@ -209,7 +200,11 @@ function spawnEnemy() {
 // ----------------------- ENEMY UPDATE ------------------------
 // ------------------------------------------------------------
 function updateEnemies() {
-  if (Math.random() < 0.02) spawnEnemy();
+  // Reduced spawn rate + minimum spacing
+  if (Math.random() < 0.01) { // lower spawn chance
+    const last = enemies[enemies.length - 1];
+    if (!last || last.x < canvas.width - 250) spawnEnemy(); // minimum spacing
+  }
 
   for (let i = enemies.length - 1; i >= 0; i--) {
     const e = enemies[i];
@@ -228,9 +223,7 @@ function updateEnemies() {
       fish.x + fish.width > e.x &&
       fish.y < e.y + e.height &&
       fish.y + fish.height > e.y
-    ) {
-      gameOver = true;
-    }
+    ) gameOver = true;
 
     if (e.x + e.width < 0) enemies.splice(i, 1);
   }
@@ -257,6 +250,7 @@ function updatePuffers() {
 
   for (let i = puffers.length - 1; i >= 0; i--) {
     const p = puffers[i];
+
     p.x -= p.speed;
 
     p.frameCounter++;
@@ -265,22 +259,18 @@ function updatePuffers() {
       p.frameCounter = 0;
     }
 
-    if (p.alive) {
-      ctx.drawImage(pufferFrames[p.frame], p.x, p.y, p.width, p.height);
-    }
+    if (p.alive) ctx.drawImage(pufferFrames[p.frame], p.x, p.y, p.width, p.height);
 
-    // COLLISION WITH FISH
+    // Collision with fish
     if (
       p.alive &&
       fish.x < p.x + p.width &&
       fish.x + fish.width > p.x &&
       fish.y < p.y + p.height &&
       fish.y + fish.height > p.y
-    ) {
-      gameOver = true;
-    }
+    ) gameOver = true;
 
-    // PUNCH-KILL PUFFER
+    // Punch kills puffer
     if (
       fish.punching &&
       p.alive &&
@@ -292,7 +282,7 @@ function updatePuffers() {
 
       // particle explosion
       for (let j = 0; j < 15; j++) {
-        particles.push(new Particle(p.x + 25, p.y + 25, "#FFD700"));
+        particles.push(new Particle(p.x + 20, p.y + 20, "#FFD700"));
       }
     }
 
@@ -344,17 +334,15 @@ function loop() {
   ctx.drawImage(background, bgX + canvas.width, 0, canvas.width, canvas.height);
 
   drawGround();
-
   fish.update();
   fish.draw();
 
   // particles
-  for (let i = particles.length - 1; i >= 0; i--) {
-    const p = particles[i];
+  particles.forEach((p, i) => {
     p.update();
     p.draw();
     if (p.life <= 0) particles.splice(i, 1);
-  }
+  });
 
   updateEnemies();
   updatePuffers();
@@ -405,7 +393,7 @@ const totalImages =
   punchFrames.length +
   enemyFrames.length +
   pufferFrames.length +
-  1; 
+  1; // jumpFrame
 
 [...walkFrames, ...punchFrames, ...enemyFrames, ...pufferFrames, jumpFrame].forEach(img => {
   img.onload = () => {

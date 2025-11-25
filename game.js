@@ -113,7 +113,6 @@ let frameSpeed = 8;
 let gravity = 0.6;
 let gameSpeed = 5;
 let score = 0;
-
 let groundY = canvas.height - 50;
 let gameOver = false;
 
@@ -167,9 +166,9 @@ const fish = {
       if (this.punchFrameCounter >= this.punchFrameSpeed) {
         this.punchFrameCounter = 0;
         this.punchFrame++;
-
         if (this.punchFrame >= punchFrames.length) {
-          this.punching = false; // stop punching
+          this.punching = false;
+          this.punchFrame = 0;
         }
       }
     }
@@ -178,6 +177,7 @@ const fish = {
   draw() {
     let sprite;
 
+    // Priority: Punch > Jump > Walk
     if (this.punching) {
       sprite = punchFrames[this.punchFrame];
     } else if (!this.grounded) {
@@ -211,7 +211,8 @@ function spawnEnemy() {
 function updateEnemies() {
   if (Math.random() < 0.02) spawnEnemy();
 
-  enemies.forEach((e, i) => {
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    const e = enemies[i];
     e.x -= e.speed;
 
     e.frameCounter++;
@@ -232,7 +233,7 @@ function updateEnemies() {
     }
 
     if (e.x + e.width < 0) enemies.splice(i, 1);
-  });
+  }
 }
 
 // ------------------------------------------------------------
@@ -256,7 +257,6 @@ function updatePuffers() {
 
   for (let i = puffers.length - 1; i >= 0; i--) {
     const p = puffers[i];
-
     p.x -= p.speed;
 
     p.frameCounter++;
@@ -292,7 +292,7 @@ function updatePuffers() {
 
       // particle explosion
       for (let j = 0; j < 15; j++) {
-        particles.push(new Particle(p.x + 20, p.y + 20, "#FFD700"));
+        particles.push(new Particle(p.x + 25, p.y + 25, "#FFD700"));
       }
     }
 
@@ -340,7 +340,6 @@ function loop() {
   // background movement
   bgX -= bgSpeed;
   if (bgX <= -canvas.width) bgX = 0;
-
   ctx.drawImage(background, bgX, 0, canvas.width, canvas.height);
   ctx.drawImage(background, bgX + canvas.width, 0, canvas.width, canvas.height);
 
@@ -350,15 +349,15 @@ function loop() {
   fish.draw();
 
   // particles
-  particles.forEach((p, i) => {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
     p.update();
     p.draw();
     if (p.life <= 0) particles.splice(i, 1);
-  });
+  }
 
   updateEnemies();
   updatePuffers();
-
   drawScore();
 
   // walking animation
@@ -408,10 +407,10 @@ const totalImages =
   pufferFrames.length +
   1; 
 
-[...walkFrames, ...punchFrames, ...enemyFrames, ...pufferFrames, jumpFrame]
-  .forEach(img => {
-    img.onload = () => {
-      imagesLoaded++;
-      if (imagesLoaded >= totalImages) loop();
-    };
-  });
+[...walkFrames, ...punchFrames, ...enemyFrames, ...pufferFrames, jumpFrame].forEach(img => {
+  img.onload = () => {
+    imagesLoaded++;
+    if (imagesLoaded >= totalImages) loop();
+  };
+});
+

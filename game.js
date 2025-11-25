@@ -1,9 +1,7 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-// ------------------------------------------------------------
 // ----------------------- FISH WALK SPRITES -------------------
-// ------------------------------------------------------------
 const walkFrames = [
   "WhatsApp_Image_2025-10-31_at_17.54.47_3f52f1be-removebg-preview.png",
   "WhatsApp_Image_2025-10-31_at_17.54.51_96433c19-removebg-preview.png",
@@ -20,9 +18,7 @@ const walkFrames = [
 const jumpFrame = new Image();
 jumpFrame.src = "WhatsApp_Image_2025-10-31_at_17.54.55_364fb04c-removebg-preview.png";
 
-// ------------------------------------------------------------
 // ----------------------- FISH PUNCH SPRITES ------------------
-// ------------------------------------------------------------
 const punchFrames = [
   "WhatsApp_Image_2025-11-21_at_19.08.00_698d1fe7-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_19.08.07_fbc3e0cf-removebg-preview.png",
@@ -33,9 +29,7 @@ const punchFrames = [
   return img;
 });
 
-// ------------------------------------------------------------
 // ----------------------- CRAB ENEMY --------------------------
-// ------------------------------------------------------------
 const enemyFrames = [
   "WhatsApp_Image_2025-11-15_at_18.26.39_87b049ea-removebg-preview.png",
   "WhatsApp_Image_2025-11-15_at_18.26.32_094df33f-removebg-preview.png",
@@ -48,17 +42,15 @@ const enemyFrames = [
 });
 
 let enemies = [];
-let enemyCooldown = 0; // control crab spawn rate
+let enemyCooldown = 0; // controls crab spawn rate
 
-// ------------------------------------------------------------
 // --------------------- PUFFERFISH ENEMY ----------------------
-// ------------------------------------------------------------
 const pufferFrames = [
   "WhatsApp_Image_2025-11-21_at_16.43.14_55cd5749-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_16.43.05_1eb00eac-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_16.42.38_22498641-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_16.42.23_aca60190-removebg-preview.png",
-  "WhatsApp_Image_2025-11-21_at_16.42.17_997a2bb4-removebg-preview.png",
+  "WhatsApp_Image_2025-11-21_at_16.42.17_997a2bb5-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_16.42.17_3e25ce04-removebg-preview.png"
 ].map(src => {
   const img = new Image();
@@ -69,9 +61,7 @@ const pufferFrames = [
 let puffers = [];
 let particles = [];
 
-// ------------------------------------------------------------
 // ------------------------- PARTICLES -------------------------
-// ------------------------------------------------------------
 class Particle {
   constructor(x, y, color) {
     this.x = x;
@@ -95,32 +85,26 @@ class Particle {
   }
 }
 
-// ------------------------------------------------------------
 // ------------------------- BACKGROUND ------------------------
-// ------------------------------------------------------------
 const background = new Image();
 background.src = "bbackground.jpeg";
 
 let bgX = 0;
 let bgSpeed = 0;
 
-// ------------------------------------------------------------
 // ----------------------- ANIMATION DATA ----------------------
-// ------------------------------------------------------------
 let currentFrame = 0;
 let frameCount = 0;
 let frameSpeed = 8;
 
 let gravity = 0.6;
-let baseSpeed = 5; // starting speed
+let baseSpeed = 4;
 let gameSpeed = baseSpeed;
 let score = 0;
 let groundY = canvas.height - 50;
 let gameOver = false;
 
-// ------------------------------------------------------------
 // ----------------------- PLAYER OBJECT -----------------------
-// ------------------------------------------------------------
 const fish = {
   x: 50,
   y: groundY - 60,
@@ -168,51 +152,43 @@ const fish = {
       if (this.punchFrameCounter >= this.punchFrameSpeed) {
         this.punchFrameCounter = 0;
         this.punchFrame++;
-        if (this.punchFrame >= punchFrames.length) {
-          this.punching = false;
-        }
+        if (this.punchFrame >= punchFrames.length) this.punching = false;
       }
     }
   },
 
   draw() {
     let sprite;
-    if (this.punching) {
-      sprite = punchFrames[this.punchFrame];
-    } else if (!this.grounded) {
-      sprite = jumpFrame;
-    } else {
-      sprite = walkFrames[currentFrame];
-    }
+    if (this.punching) sprite = punchFrames[this.punchFrame];
+    else if (!this.grounded) sprite = jumpFrame;
+    else sprite = walkFrames[currentFrame];
+
     ctx.drawImage(sprite, this.x, this.y, this.width, this.height);
   }
 };
 
-// ------------------------------------------------------------
 // ----------------------- ENEMY SPAWN -------------------------
-// ------------------------------------------------------------
 function spawnEnemy() {
   if (enemyCooldown <= 0) {
     enemies.push({
-      x: canvas.width + Math.random() * 300,
+      x: canvas.width + 50,
       y: groundY - 40,
       width: 60,
       height: 40,
-      speed: gameSpeed,
+      speed: 3 + Math.random() * 2, // visible speed even at start
       frame: 0,
       frameCounter: 0
     });
-    enemyCooldown = 120; // cooldown in frames (slower spawn)
+    enemyCooldown = 90 + Math.random() * 30; // random spawn interval
   }
 }
 
-// ------------------------------------------------------------
 // ----------------------- ENEMY UPDATE ------------------------
-// ------------------------------------------------------------
 function updateEnemies() {
   enemyCooldown--;
 
-  enemies.forEach((e, i) => {
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    const e = enemies[i];
     e.x -= e.speed;
 
     e.frameCounter++;
@@ -233,12 +209,10 @@ function updateEnemies() {
     }
 
     if (e.x + e.width < 0) enemies.splice(i, 1);
-  });
+  }
 }
 
-// ------------------------------------------------------------
 // --------------------- PUFFERFISH UPDATE ---------------------
-// ------------------------------------------------------------
 function spawnPuffer() {
   puffers.push({
     x: canvas.width + 50,
@@ -257,7 +231,6 @@ function updatePuffers() {
 
   for (let i = puffers.length - 1; i >= 0; i--) {
     const p = puffers[i];
-
     p.x -= p.speed;
 
     p.frameCounter++;
@@ -268,18 +241,16 @@ function updatePuffers() {
 
     if (p.alive) ctx.drawImage(pufferFrames[p.frame], p.x, p.y, p.width, p.height);
 
-    // COLLISION WITH FISH
+    // Collision
     if (
       p.alive &&
       fish.x < p.x + p.width &&
       fish.x + fish.width > p.x &&
       fish.y < p.y + p.height &&
       fish.y + fish.height > p.y
-    ) {
-      gameOver = true;
-    }
+    ) gameOver = true;
 
-    // PUNCH-KILL PUFFER
+    // Punch kill
     if (
       fish.punching &&
       p.alive &&
@@ -288,35 +259,27 @@ function updatePuffers() {
       fish.y + fish.height > p.y
     ) {
       p.alive = false;
-      for (let j = 0; j < 15; j++) {
-        particles.push(new Particle(p.x + 25, p.y + 25, "#FFD700"));
-      }
+      for (let j = 0; j < 15; j++) particles.push(new Particle(p.x + 25, p.y + 25, "#FFD700"));
     }
 
     if (p.x + p.width < 0) puffers.splice(i, 1);
   }
 }
 
-// ------------------------------------------------------------
 // --------------------------- GROUND --------------------------
-// ------------------------------------------------------------
 function drawGround() {
   ctx.fillStyle = "#FFDF8A";
   ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
 }
 
-// ------------------------------------------------------------
 // ---------------------------- SCORE --------------------------
-// ------------------------------------------------------------
 function drawScore() {
   ctx.fillStyle = "#000";
   ctx.font = "20px Arial";
   ctx.fillText(`Score: ${Math.floor(score)}`, 650, 30);
 }
 
-// ------------------------------------------------------------
 // --------------------------- RESET ---------------------------
-// ------------------------------------------------------------
 function resetGame() {
   enemies = [];
   puffers = [];
@@ -326,16 +289,14 @@ function resetGame() {
   fish.y = groundY - fish.height;
   fish.dy = 0;
 
-  gameSpeed = baseSpeed; // reset speed
+  gameSpeed = baseSpeed;
   bgSpeed = 0;
   enemyCooldown = 0;
 
   loop();
 }
 
-// ------------------------------------------------------------
 // --------------------------- LOOP ----------------------------
-// ------------------------------------------------------------
 function loop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -363,7 +324,7 @@ function loop() {
 
   drawScore();
 
-  // walking animation
+  // Walking animation
   if (fish.grounded && !fish.punching) {
     frameCount++;
     if (frameCount >= frameSpeed) {
@@ -393,25 +354,21 @@ function loop() {
   requestAnimationFrame(loop);
 }
 
-// ------------------------------------------------------------
 // --------------------------- CONTROLS -------------------------
-// ------------------------------------------------------------
 document.addEventListener("keydown", e => {
   if (e.code === "Space") fish.jump();
   if (e.code === "KeyR" && gameOver) resetGame();
   if (e.code === "KeyE") fish.punch();
 });
 
-// ------------------------------------------------------------
 // ------------------------ IMAGE LOADING -----------------------
-// ------------------------------------------------------------
 let imagesLoaded = 0;
 const totalImages =
   walkFrames.length +
   punchFrames.length +
   enemyFrames.length +
   pufferFrames.length +
-  1; // jumpFrame
+  1;
 
 [...walkFrames, ...punchFrames, ...enemyFrames, ...pufferFrames, jumpFrame].forEach(img => {
   img.onload = () => {
@@ -419,5 +376,6 @@ const totalImages =
     if (imagesLoaded >= totalImages) loop();
   };
 });
+
 
 

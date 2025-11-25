@@ -1,9 +1,7 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-// ------------------------------------------------------------
 // ----------------------- FISH WALK SPRITES -------------------
-// ------------------------------------------------------------
 const walkFrames = [
   "WhatsApp_Image_2025-10-31_at_17.54.47_3f52f1be-removebg-preview.png",
   "WhatsApp_Image_2025-10-31_at_17.54.51_96433c19-removebg-preview.png",
@@ -20,9 +18,7 @@ const walkFrames = [
 const jumpFrame = new Image();
 jumpFrame.src = "WhatsApp_Image_2025-10-31_at_17.54.55_364fb04c-removebg-preview.png";
 
-// ------------------------------------------------------------
 // ----------------------- FISH PUNCH SPRITES ------------------
-// ------------------------------------------------------------
 const punchFrames = [
   "WhatsApp_Image_2025-11-21_at_19.08.00_698d1fe7-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_19.08.07_fbc3e0cf-removebg-preview.png",
@@ -33,9 +29,7 @@ const punchFrames = [
   return img;
 });
 
-// ------------------------------------------------------------
 // ----------------------- CRAB ENEMY --------------------------
-// ------------------------------------------------------------
 const enemyFrames = [
   "WhatsApp_Image_2025-11-15_at_18.26.39_87b049ea-removebg-preview.png",
   "WhatsApp_Image_2025-11-15_at_18.26.32_094df33f-removebg-preview.png",
@@ -48,10 +42,9 @@ const enemyFrames = [
 });
 
 let enemies = [];
+let enemyCooldown = 0; // cooldown to prevent too many crabs
 
-// ------------------------------------------------------------
 // --------------------- PUFFERFISH ENEMY ----------------------
-// ------------------------------------------------------------
 const pufferFrames = [
   "WhatsApp_Image_2025-11-21_at_16.43.14_55cd5749-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_16.43.05_1eb00eac-removebg-preview.png",
@@ -68,9 +61,7 @@ const pufferFrames = [
 let puffers = [];
 let particles = [];
 
-// ------------------------------------------------------------
 // ------------------------- PARTICLES -------------------------
-// ------------------------------------------------------------
 class Particle {
   constructor(x, y, color) {
     this.x = x;
@@ -94,18 +85,14 @@ class Particle {
   }
 }
 
-// ------------------------------------------------------------
 // ------------------------- BACKGROUND ------------------------
-// ------------------------------------------------------------
 const background = new Image();
 background.src = "bbackground.jpeg";
 
 let bgX = 0;
 let bgSpeed = 0;
 
-// ------------------------------------------------------------
 // ----------------------- ANIMATION DATA ----------------------
-// ------------------------------------------------------------
 let currentFrame = 0;
 let frameCount = 0;
 let frameSpeed = 8;
@@ -113,12 +100,11 @@ let frameSpeed = 8;
 let gravity = 0.6;
 let gameSpeed = 5;
 let score = 0;
+
 let groundY = canvas.height - 50;
 let gameOver = false;
 
-// ------------------------------------------------------------
 // ----------------------- PLAYER OBJECT -----------------------
-// ------------------------------------------------------------
 const fish = {
   x: 50,
   y: groundY - 60,
@@ -128,7 +114,6 @@ const fish = {
   grounded: true,
   jumpForce: -12,
 
-  // Punching
   punching: false,
   punchFrame: 0,
   punchFrameCounter: 0,
@@ -160,7 +145,6 @@ const fish = {
       this.grounded = true;
     }
 
-    // Punch animation
     if (this.punching) {
       this.punchFrameCounter++;
       if (this.punchFrameCounter >= this.punchFrameSpeed) {
@@ -181,9 +165,7 @@ const fish = {
   }
 };
 
-// ------------------------------------------------------------
 // ----------------------- ENEMY SPAWN -------------------------
-// ------------------------------------------------------------
 function spawnEnemy() {
   enemies.push({
     x: canvas.width + Math.random() * 300,
@@ -196,15 +178,15 @@ function spawnEnemy() {
   });
 }
 
-// ------------------------------------------------------------
 // ----------------------- ENEMY UPDATE ------------------------
-// ------------------------------------------------------------
 function updateEnemies() {
-  // Reduced spawn rate + minimum spacing
-  if (Math.random() < 0.01) { // lower spawn chance
+  if (enemyCooldown <= 0) {
     const last = enemies[enemies.length - 1];
-    if (!last || last.x < canvas.width - 250) spawnEnemy(); // minimum spacing
-  }
+    if (!last || last.x < canvas.width - 250) {
+      spawnEnemy();
+      enemyCooldown = 120; // ~2 seconds cooldown
+    }
+  } else enemyCooldown--;
 
   for (let i = enemies.length - 1; i >= 0; i--) {
     const e = enemies[i];
@@ -223,15 +205,15 @@ function updateEnemies() {
       fish.x + fish.width > e.x &&
       fish.y < e.y + e.height &&
       fish.y + fish.height > e.y
-    ) gameOver = true;
+    ) {
+      gameOver = true;
+    }
 
     if (e.x + e.width < 0) enemies.splice(i, 1);
   }
 }
 
-// ------------------------------------------------------------
 // --------------------- PUFFERFISH UPDATE ---------------------
-// ------------------------------------------------------------
 function spawnPuffer() {
   puffers.push({
     x: canvas.width + 50,
@@ -250,7 +232,6 @@ function updatePuffers() {
 
   for (let i = puffers.length - 1; i >= 0; i--) {
     const p = puffers[i];
-
     p.x -= p.speed;
 
     p.frameCounter++;
@@ -261,7 +242,7 @@ function updatePuffers() {
 
     if (p.alive) ctx.drawImage(pufferFrames[p.frame], p.x, p.y, p.width, p.height);
 
-    // Collision with fish
+    // COLLISION WITH FISH
     if (
       p.alive &&
       fish.x < p.x + p.width &&
@@ -270,7 +251,7 @@ function updatePuffers() {
       fish.y + fish.height > p.y
     ) gameOver = true;
 
-    // Punch kills puffer
+    // PUNCH-KILL PUFFER
     if (
       fish.punching &&
       p.alive &&
@@ -279,8 +260,6 @@ function updatePuffers() {
       fish.y + fish.height > p.y
     ) {
       p.alive = false;
-
-      // particle explosion
       for (let j = 0; j < 15; j++) {
         particles.push(new Particle(p.x + 20, p.y + 20, "#FFD700"));
       }
@@ -290,26 +269,20 @@ function updatePuffers() {
   }
 }
 
-// ------------------------------------------------------------
 // --------------------------- GROUND --------------------------
-// ------------------------------------------------------------
 function drawGround() {
   ctx.fillStyle = "#FFDF8A";
   ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
 }
 
-// ------------------------------------------------------------
 // ---------------------------- SCORE --------------------------
-// ------------------------------------------------------------
 function drawScore() {
   ctx.fillStyle = "#000";
   ctx.font = "20px Arial";
   ctx.fillText(`Score: ${Math.floor(score)}`, 650, 30);
 }
 
-// ------------------------------------------------------------
 // --------------------------- RESET ---------------------------
-// ------------------------------------------------------------
 function resetGame() {
   enemies = [];
   puffers = [];
@@ -318,16 +291,14 @@ function resetGame() {
   gameOver = false;
   fish.y = groundY - fish.height;
   fish.dy = 0;
+  enemyCooldown = 0;
   loop();
 }
 
-// ------------------------------------------------------------
 // --------------------------- LOOP ----------------------------
-// ------------------------------------------------------------
 function loop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // background movement
   bgX -= bgSpeed;
   if (bgX <= -canvas.width) bgX = 0;
   ctx.drawImage(background, bgX, 0, canvas.width, canvas.height);
@@ -338,14 +309,16 @@ function loop() {
   fish.draw();
 
   // particles
-  particles.forEach((p, i) => {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
     p.update();
     p.draw();
     if (p.life <= 0) particles.splice(i, 1);
-  });
+  }
 
   updateEnemies();
   updatePuffers();
+
   drawScore();
 
   // walking animation
@@ -375,25 +348,21 @@ function loop() {
   requestAnimationFrame(loop);
 }
 
-// ------------------------------------------------------------
 // --------------------------- CONTROLS -------------------------
-// ------------------------------------------------------------
 document.addEventListener("keydown", e => {
   if (e.code === "Space") fish.jump();
   if (e.code === "KeyR" && gameOver) resetGame();
   if (e.code === "KeyE") fish.punch();
 });
 
-// ------------------------------------------------------------
 // ------------------------ IMAGE LOADING -----------------------
-// ------------------------------------------------------------
 let imagesLoaded = 0;
 const totalImages =
   walkFrames.length +
   punchFrames.length +
   enemyFrames.length +
   pufferFrames.length +
-  1; // jumpFrame
+  1;
 
 [...walkFrames, ...punchFrames, ...enemyFrames, ...pufferFrames, jumpFrame].forEach(img => {
   img.onload = () => {

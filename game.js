@@ -34,13 +34,13 @@ const punchFrames = [
 });
 
 // ------------------------------------------------------------
-// ----------------------- CRAB ENEMY --------------------------
+// ----------------------- CRAB ENEMY (FIXED ORDER) ------------
 // ------------------------------------------------------------
 const enemyFrames = [
-  "WhatsApp_Image_2025-11-15_at_18.26.39_87b049ea-removebg-preview.png",
-  "WhatsApp_Image_2025-11-15_at_18.26.32_094df33f-removebg-preview.png",
+  "WhatsApp_Image_2025-11-15_at_18.26.11_a228a4d3-removebg-preview.png",
   "WhatsApp_Image_2025-11-15_at_18.26.17_8b544d03-removebg-preview.png",
-  "WhatsApp_Image_2025-11-15_at_18.26.11_a228a4d3-removebg-preview.png"
+  "WhatsApp_Image_2025-11-15_at_18.26.32_094df33f-removebg-preview.png",
+  "WhatsApp_Image_2025-11-15_at_18.26.39_87b049ea-removebg-preview.png"
 ].map(src => {
   const img = new Image();
   img.src = src;
@@ -48,7 +48,7 @@ const enemyFrames = [
 });
 
 let enemies = [];
-let enemyCooldown = 0; // controls crab spawn rate
+let enemyCooldown = 0;
 
 // ------------------------------------------------------------
 // --------------------- PUFFERFISH ENEMY ----------------------
@@ -160,7 +160,6 @@ const fish = {
       this.grounded = true;
     }
 
-    // Punch animation
     if (this.punching) {
       this.punchFrameCounter++;
       if (this.punchFrameCounter >= this.punchFrameSpeed) {
@@ -198,7 +197,7 @@ function spawnEnemy() {
       frame: 0,
       frameCounter: 0
     });
-    enemyCooldown = 150; // frames cooldown between crabs
+    enemyCooldown = 150;
   }
 }
 
@@ -207,6 +206,8 @@ function spawnEnemy() {
 // ------------------------------------------------------------
 function updateEnemies() {
   enemyCooldown--;
+  if (enemyCooldown <= 0) spawnEnemy();
+
   for (let i = enemies.length - 1; i >= 0; i--) {
     const e = enemies[i];
     e.x -= e.speed;
@@ -326,7 +327,6 @@ function resetGame() {
 function loop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // background scroll
   bgX -= bgSpeed;
   if (bgX <= -canvas.width) bgX = 0;
   ctx.drawImage(background, bgX, 0, canvas.width, canvas.height);
@@ -348,7 +348,6 @@ function loop() {
   updatePuffers();
   drawScore();
 
-  // walking animation
   if (fish.grounded && !fish.punching) {
     frameCount++;
     if (frameCount >= frameSpeed) {
@@ -357,7 +356,6 @@ function loop() {
     }
   }
 
-  // Gradually increase speed like Dino game
   if (!gameOver) {
     score += 0.1;
     gameSpeed += 0.002;
@@ -406,7 +404,6 @@ images.forEach(img => {
   };
 });
 
-// fallback: start game after 2 seconds even if some images fail
 setTimeout(() => {
   if (!loopStarted) startGame();
 }, 2000);
@@ -417,5 +414,3 @@ function startGame() {
     loop();
   }
 }
-
-

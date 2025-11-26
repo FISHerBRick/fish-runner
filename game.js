@@ -48,7 +48,7 @@ const enemyFrames = [
 });
 
 let enemies = [];
-let enemyCooldown = 0; // controls crab spawn rate
+let enemyCooldown = 0;
 
 // ------------------------------------------------------------
 // --------------------- PUFFERFISH ENEMY ----------------------
@@ -58,7 +58,7 @@ const pufferFrames = [
   "WhatsApp_Image_2025-11-21_at_16.43.05_1eb00eac-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_16.42.38_22498641-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_16.42.23_aca60190-removebg-preview.png",
-  "WhatsApp_Image_2025-11-21_at_16.42.17_997a2bb5-removebg-preview.png",
+  "WhatsApp_Image_2025-11-21_at_16.42.17_997a2bb4-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_16.42.17_3e25ce04-removebg-preview.png"
 ].map(src => {
   const img = new Image();
@@ -189,16 +189,18 @@ const fish = {
 // ------------------------------------------------------------
 function spawnEnemy() {
   if (enemyCooldown <= 0) {
+    const crabImg = enemyFrames[0];
+    const crabHeight = crabImg.height || 50;
     enemies.push({
       x: canvas.width + Math.random() * 200,
-      y: groundY - 50, // crab sits properly on the ground
-      width: 50,
-      height: 50,
+      y: groundY - crabHeight,
+      width: 60,
+      height: crabHeight,
       speed: gameSpeed,
       frame: 0,
       frameCounter: 0
     });
-    enemyCooldown = 150; 
+    enemyCooldown = 150;
   }
 }
 
@@ -357,6 +359,7 @@ function loop() {
     }
   }
 
+  // Gradually increase speed like Dino game
   if (!gameOver) {
     score += 0.1;
     gameSpeed += 0.002;
@@ -416,4 +419,3 @@ function startGame() {
     loop();
   }
 }
-

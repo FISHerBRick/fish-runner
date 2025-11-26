@@ -34,13 +34,13 @@ const punchFrames = [
 });
 
 // ------------------------------------------------------------
-// ----------------------- CRAB ENEMY (FIXED ORDER) ------------
+// ----------------------- CRAB ENEMY --------------------------
 // ------------------------------------------------------------
 const enemyFrames = [
-  "WhatsApp_Image_2025-11-15_at_18.26.11_a228a4d3-removebg-preview.png",
-  "WhatsApp_Image_2025-11-15_at_18.26.17_8b544d03-removebg-preview.png",
+  "WhatsApp_Image_2025-11-15_at_18.26.39_87b049ea-removebg-preview.png",
   "WhatsApp_Image_2025-11-15_at_18.26.32_094df33f-removebg-preview.png",
-  "WhatsApp_Image_2025-11-15_at_18.26.39_87b049ea-removebg-preview.png"
+  "WhatsApp_Image_2025-11-15_at_18.26.17_8b544d03-removebg-preview.png",
+  "WhatsApp_Image_2025-11-15_at_18.26.11_a228a4d3-removebg-preview.png"
 ].map(src => {
   const img = new Image();
   img.src = src;
@@ -48,7 +48,7 @@ const enemyFrames = [
 });
 
 let enemies = [];
-let enemyCooldown = 0;
+let enemyCooldown = 0; // controls crab spawn rate
 
 // ------------------------------------------------------------
 // --------------------- PUFFERFISH ENEMY ----------------------
@@ -58,7 +58,7 @@ const pufferFrames = [
   "WhatsApp_Image_2025-11-21_at_16.43.05_1eb00eac-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_16.42.38_22498641-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_16.42.23_aca60190-removebg-preview.png",
-  "WhatsApp_Image_2025-11-21_at_16.42.17_997a2bb4-removebg-preview.png",
+  "WhatsApp_Image_2025-11-21_at_16.42.17_997a2bb5-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_16.42.17_3e25ce04-removebg-preview.png"
 ].map(src => {
   const img = new Image();
@@ -160,6 +160,7 @@ const fish = {
       this.grounded = true;
     }
 
+    // Punch animation
     if (this.punching) {
       this.punchFrameCounter++;
       if (this.punchFrameCounter >= this.punchFrameSpeed) {
@@ -190,14 +191,14 @@ function spawnEnemy() {
   if (enemyCooldown <= 0) {
     enemies.push({
       x: canvas.width + Math.random() * 200,
-      y: groundY - 40,
-      width: 60,
-      height: 40,
+      y: groundY - 50, // crab sits properly on the ground
+      width: 50,
+      height: 50,
       speed: gameSpeed,
       frame: 0,
       frameCounter: 0
     });
-    enemyCooldown = 150;
+    enemyCooldown = 150; 
   }
 }
 
@@ -206,8 +207,6 @@ function spawnEnemy() {
 // ------------------------------------------------------------
 function updateEnemies() {
   enemyCooldown--;
-  if (enemyCooldown <= 0) spawnEnemy();
-
   for (let i = enemies.length - 1; i >= 0; i--) {
     const e = enemies[i];
     e.x -= e.speed;
@@ -327,6 +326,7 @@ function resetGame() {
 function loop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // background scroll
   bgX -= bgSpeed;
   if (bgX <= -canvas.width) bgX = 0;
   ctx.drawImage(background, bgX, 0, canvas.width, canvas.height);
@@ -348,6 +348,7 @@ function loop() {
   updatePuffers();
   drawScore();
 
+  // walking animation
   if (fish.grounded && !fish.punching) {
     frameCount++;
     if (frameCount >= frameSpeed) {
@@ -404,6 +405,7 @@ images.forEach(img => {
   };
 });
 
+// fallback: start game after 2 seconds even if some images fail
 setTimeout(() => {
   if (!loopStarted) startGame();
 }, 2000);
@@ -414,3 +416,4 @@ function startGame() {
     loop();
   }
 }
+

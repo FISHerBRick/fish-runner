@@ -10,7 +10,11 @@ const walkFrames = [
   "WhatsApp_Image_2025-10-31_at_17.54.55_364fb04c-removebg-preview.png",
   "WhatsApp_Image_2025-10-31_at_17.55.00_aec8cfdd-removebg-preview.png",
   "WhatsApp_Image_2025-10-31_at_17.55.04_92df43ed-removebg-preview.png"
-].map(src => { const img = new Image(); img.src = src; return img; });
+].map(src => {
+  const img = new Image();
+  img.src = src;
+  return img;
+});
 
 // Jump sprite
 const jumpFrame = new Image();
@@ -23,7 +27,11 @@ const punchFrames = [
   "WhatsApp_Image_2025-11-21_at_19.08.00_698d1fe7-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_19.08.07_fbc3e0cf-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_19.08.15_a15ae3db-removebg-preview.png"
-].map(src => { const img = new Image(); img.src = src; return img; });
+].map(src => {
+  const img = new Image();
+  img.src = src;
+  return img;
+});
 
 // ------------------------------------------------------------
 // ----------------------- CRAB ENEMY --------------------------
@@ -33,10 +41,14 @@ const enemyFrames = [
   "WhatsApp_Image_2025-11-15_at_18.26.32_094df33f-removebg-preview.png",
   "WhatsApp_Image_2025-11-15_at_18.26.17_8b544d03-removebg-preview.png",
   "WhatsApp_Image_2025-11-15_at_18.26.11_a228a4d3-removebg-preview.png"
-].map(src => { const img = new Image(); img.src = src; return img; });
+].map(src => {
+  const img = new Image();
+  img.src = src;
+  return img;
+});
 
 let enemies = [];
-let enemyCooldown = 0;
+let enemyCooldown = 0; // controls crab spawn rate
 
 // ------------------------------------------------------------
 // --------------------- PUFFERFISH ENEMY ----------------------
@@ -48,7 +60,11 @@ const pufferFrames = [
   "WhatsApp_Image_2025-11-21_at_16.42.23_aca60190-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_16.42.17_997a2bb4-removebg-preview.png",
   "WhatsApp_Image_2025-11-21_at_16.42.17_3e25ce04-removebg-preview.png"
-].map(src => { const img = new Image(); img.src = src; return img; });
+].map(src => {
+  const img = new Image();
+  img.src = src;
+  return img;
+});
 
 let puffers = [];
 let particles = [];
@@ -144,6 +160,7 @@ const fish = {
       this.grounded = true;
     }
 
+    // Punch animation
     if (this.punching) {
       this.punchFrameCounter++;
       if (this.punchFrameCounter >= this.punchFrameSpeed) {
@@ -174,14 +191,14 @@ function spawnEnemy() {
   if (enemyCooldown <= 0) {
     enemies.push({
       x: canvas.width + Math.random() * 200,
-      y: groundY - 40, // ensure crab is on the ground
+      y: groundY - 40,
       width: 60,
       height: 40,
       speed: gameSpeed,
       frame: 0,
       frameCounter: 0
     });
-    enemyCooldown = 150;
+    enemyCooldown = 150; // frames cooldown between crabs
   }
 }
 
@@ -252,9 +269,7 @@ function updatePuffers() {
       fish.x + fish.width > p.x &&
       fish.y < p.y + p.height &&
       fish.y + fish.height > p.y
-    ) {
-      gameOver = true;
-    }
+    ) gameOver = true;
 
     if (
       fish.punching &&
@@ -329,10 +344,14 @@ function loop() {
     if (p.life <= 0) particles.splice(i, 1);
   }
 
+  // spawn crabs
+  spawnEnemy();
   updateEnemies();
+
   updatePuffers();
   drawScore();
 
+  // walking animation
   if (fish.grounded && !fish.punching) {
     frameCount++;
     if (frameCount >= frameSpeed) {
@@ -341,6 +360,7 @@ function loop() {
     }
   }
 
+  // Gradually increase speed like Dino game
   if (!gameOver) {
     score += 0.1;
     gameSpeed += 0.002;
@@ -355,13 +375,14 @@ function loop() {
     ctx.fillText("Game Over!", canvas.width / 2 - 120, 100);
     ctx.font = "20px Arial";
     ctx.fillText("Press R to Restart", canvas.width / 2 - 90, 130);
+    return;
   }
 
   requestAnimationFrame(loop);
 }
 
 // ------------------------------------------------------------
-// --------------------------- CONTROLS ------------------------
+// --------------------------- CONTROLS -------------------------
 // ------------------------------------------------------------
 document.addEventListener("keydown", e => {
   if (e.code === "Space") fish.jump();
@@ -388,6 +409,7 @@ images.forEach(img => {
   };
 });
 
+// fallback: start game after 2 seconds even if some images fail
 setTimeout(() => {
   if (!loopStarted) startGame();
 }, 2000);
@@ -398,3 +420,4 @@ function startGame() {
     loop();
   }
 }
+
